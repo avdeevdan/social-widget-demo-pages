@@ -1,0 +1,4 @@
+/* Шрифты из ui-kit (D:\\Claude\\uikit\\fonts). Только woff2/ttf, лежат рядом. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("Inter-roman.var.woff2") format("woff2")}
+@font-face{font-family:"cbuc-icons";font-display:block;src:url("cbuc-icons.ttf") format("truetype")}
+@font-face{font-family:"cbuc-icons24";font-display:block;src:url("cbuc-icons24.ttf") format("truetype")}

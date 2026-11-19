@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Виджет «Соцсети» — демо</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/ui-kit/tokens.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/button/button.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/close-button/close-button.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/tumbler/tumbler.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/builder-header/builder-header.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/left-sidebar/left-sidebar.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/demo-frame/demo-frame.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/toolbar/toolbar.css?v=2">
+<link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
+<link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
+<link rel="stylesheet" href="styles.css?v=64">
+</head>
+<body>
+<div id="stage" class="stage">
+  <div id="app">
+
+    <!-- Шапка конструктора (ui-kit: builder-header, режим редактирования); разметку строит app.js -->
+    <header id="header"></header>
+
+    <div class="body">
+
+      <!-- Левый сайдбар «Страницы» (ui-kit: left-sidebar), состояние «По ховеру»: линии, панель выезжает по наведению -->
+      <aside class="lsb lsb--hover" id="lsb">
+        <div class="lsb__lines"></div>
+        <div class="lsb__panel">
+          <div class="lsb__head">
+            <div class="lsb__title">
+              <h2 class="lsb__name">Страницы</h2>
+              <button type="button" class="btn btn--filled btn--style-pale btn--size-m btn--icon" data-lsb-add aria-label="Добавить страницу"><span class="btn__icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7.25 2h1.5v5.25H14v1.5H8.75V14h-1.5V8.75H2v-1.5h5.25z"/></svg></span></button>
+            </div>
+            <div class="lsb__toggle">
+              <button type="button" class="btn btn--filled btn--style-pale btn--size-m btn--icon" aria-label="Закрепить панель"><span class="btn__icon"></span></button>
+            </div>
+          </div>
+          <div class="lsb__list"></div>
+        </div>
+      </aside>
+
+      <!-- Центральная часть: страница сайта в редакторе -->
+      <main class="screens">
+        <div class="canvas">
+          <div class="drag drag--l" id="dragL" aria-label="Изменить ширину страницы"><i class="drag__line"></i><i class="drag__btn"></i></div>
+          <div class="page" id="page">
+            <div class="page__scroll" id="pageScroll">
+              <div class="page__inner" id="pageInner">
+
+                <section class="hero">
+                  <h1 class="hero__title">Реферальная программа</h1>
+                  <p class="hero__text">Рекомендуйте Saby знакомым предпринимателям и получайте вознаграждение за каждого подключившегося клиента.</p>
+                  <div class="hero__form">
+                    <div class="field">Ваше имя</div>
+                    <div class="field">Телефон</div>
+                    <div class="field">Электронная почта</div>
+                  </div>
+                  <p class="hero__agree">Нажимая на кнопку, вы соглашаетесь на обработку персональных данных и присоединяетесь к регламенту Saby</p>
+                  <div class="hero__cta">
+                    <a class="cta" href="#" onclick="return false">Связаться со мной</a>
+                    <p class="hero__note">оперативно перезвоним без спама<br>и навязчивой рекламы</p>
+                  </div>
+                </section>
+
+                <!-- Подвал сайта -->
+                <section class="sec stk stk--v" id="sec">
+                <footer class="foot stk stk--v">
+                  <div class="foot__row1 stk stk--h">
+                  <div class="foot__col stk stk--v" style="left:140px">
+                    <h3 class="w leaf">Сервисы</h3>
+                    <ul>
+                      <li class="w leaf">Бухгалтерия и учет</li><li class="w leaf">Отчетность через интернет</li><li class="w leaf">Электронный документооборот</li><li class="w leaf">Транспорт и логистика</li><li class="w leaf">Все о компаниях и владельцах</li><li class="w leaf">Торги и закупки</li><li class="w leaf">ОФД</li><li class="w leaf">Автоматизация бизнеса</li><li class="w leaf">Маркировка</li><li class="w leaf">Управление персоналом</li><li class="w leaf">Корпоративный портал</li><li class="w leaf">CRM</li><li class="w leaf">Электронная подпись</li><li class="w leaf">Удаленный доступ</li>
+                      <li class="gap w leaf">Крупному бизнесу</li>
+                    </ul>
+                  </div>
+                  <div class="foot__col stk stk--v" style="left:365px">
+                    <h3 class="w leaf">Оборудование</h3>
+                    <ul>
+                      <li class="w leaf">Комплекты оборудования</li><li class="w leaf">Онлайн-кассы</li><li class="w leaf">Фискальные накопители</li><li class="w leaf">Кассовые компьютеры</li><li class="w leaf">Кассы самообслуживания</li><li class="w leaf">Сканеры штрихкодов</li><li class="w leaf">Принтеры этикеток</li><li class="w leaf">Терминалы сбора данных</li><li class="w leaf">Электронные весы</li><li class="w leaf">Денежные ящики</li><li class="w leaf">Расходные материалы</li>
+                      <li class="gap w leaf">Доставка и оплата</li><li class="w leaf">Сервисный центр</li><li class="w leaf">Гарантия</li>
+                    </ul>
+                  </div>
+                  <div class="foot__col stk stk--v" style="left:591px">
+                    <h3 class="w leaf">Полезное</h3>
+                    <ul>
+                      <li class="w leaf">СБИС теперь Saby</li><li class="w leaf">Журнал</li><li class="w leaf">Новости</li><li class="w leaf">Как заполнить отчеты</li><li class="clip w leaf">Форматы первичных документов</li>
+                      <li class="gap w leaf">Поддержка</li><li class="w leaf">База знаний</li><li class="w leaf">Мобильные приложения</li><li class="w leaf">Мастер настройки</li><li class="w leaf">Скачать локальные версии</li>
+                      <li class="gap w leaf">Демо</li><li class="w leaf">Отзывы о Saby</li>
+                      <li class="gap w leaf">Академия Saby</li>
+                    </ul>
+                  </div>
+                  <div class="foot__col stk stk--v" style="left:817px">
+                    <h3 class="w leaf">О компании</h3>
+                    <ul>
+                      <li class="w leaf">Контакты</li><li class="w leaf">Тарифы</li><li class="w leaf">Партнерам</li><li class="w leaf">Агентам</li><li class="w leaf">Защита данных</li>
+                      <li class="gap w leaf">Публичный договор (оферта)</li><li class="w leaf">Регламент использования</li><li class="w leaf">Политика ПДн</li><li class="w leaf">Все документы и политики</li>
+                    </ul>
+                    <a class="foot__review w leaf" href="#" onclick="return false">Оставить отзыв</a>
+                  </div>
+
+                  </div>
+                  <div class="foot__row2 stk stk--h">
+                    <div class="foot__addr stk stk--v">
+                      <a class="foot__region" href="#" onclick="return false">Ярославская обл.</a>
+                      <div class="stk stk--h"><span>г. Ярославль, ул. Наумова, д.20</span><i class="pin">&#xEA95;</i></div>
+                      <div class="stk stk--h"><span>г. Рыбинск, ул. Герцена, д.34, 2 этаж, оф.8</span><i class="pin">&#xEA95;</i></div>
+                    </div>
+                    <div class="foot__phones stk stk--h">
+                      <div class="stk stk--v"><span>+7 4852 50-06-20</span><span>+7 4855 23-96-00</span></div>
+                    </div>
+                    <div class="foot__cc stk stk--v">
+                      <div class="foot__apps stk stk--h"><span><i class="app"></i>App Store</span><span><i class="app"></i>Google Play</span></div>
+                      <div class="foot__social w leaf wg wg--style-success is-active" id="socialSlot">
+                    <div class="social-items wg__content">
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="vkontakte" data-link="https://vk.com/sbis_saby" aria-label="ВКонтакте">
+                        <span class="btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 16 16">
+                            <path d="M11.9578 8.50349C11.7638 8.26349 11.8193 8.15672 11.9578 7.94219C11.9603 7.93974 13.5619 5.7719 13.7269 5.03672L13.7279 5.03623C13.8099 4.76831 13.7279 4.57141 13.3314 4.57141H12.0193C11.6853 4.57141 11.5313 4.74039 11.4488 4.92945C11.4488 4.92945 10.7808 6.49582 9.83577 7.51117C9.53076 7.80455 9.38976 7.89859 9.22325 7.89859C9.14125 7.89859 9.01374 7.80455 9.01374 7.53664V5.03623C9.01374 4.71492 8.92024 4.57141 8.64373 4.57141H6.58066C6.37115 4.57141 6.24665 4.72129 6.24665 4.86088C6.24665 5.16553 6.71916 5.23557 6.76817 6.09272V7.95247C6.76817 8.35998 6.69266 8.43492 6.52516 8.43492C6.07914 8.43492 4.9966 6.86219 4.35508 5.06219C4.22558 4.71296 4.09907 4.5719 3.76256 4.5719H2.45002C2.0755 4.5719 2 4.74088 2 4.92994C2 5.26398 2.44602 6.92488 4.07407 9.11917C5.15911 10.617 6.68716 11.4286 8.07721 11.4286C8.91274 11.4286 9.01474 11.2483 9.01474 10.9383C9.01474 9.50708 8.93924 9.3719 9.35776 9.3719C9.55176 9.3719 9.88577 9.46594 10.6658 10.1884C11.5573 11.045 11.7038 11.4286 12.2029 11.4286H13.5149C13.8889 11.4286 14.0784 11.2483 13.9694 10.8927C13.7199 10.1448 12.0338 8.60635 11.9578 8.50349Z"/>
+                          </svg>
+                        </span>
+                        <span class="btn__caption" hidden>ВКонтакте</span>
+                      </button>
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="max" data-link="https://max.ru/sbis_saby" aria-label="MAX">
+                        <span class="btn__icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M8.12892 13.9658C6.95127 13.9658 6.404 13.7931 5.45271 13.1024C4.85099 13.8794 2.94556 14.4866 2.86246 13.4478C2.86246 12.6679 2.69054 12.0089 2.4957 11.2894C2.26361 10.4031 2 9.41601 2 7.98576C2 4.56985 4.79082 2 8.0974 2C11.4068 2 14 4.69647 14 8.01741C14.0111 11.287 11.3843 13.9483 8.12892 13.9658ZM8.17763 4.95259C6.56732 4.86913 5.31231 5.98859 5.03437 7.74402C4.80515 9.1973 5.21202 10.9671 5.55873 11.0592C5.72492 11.0995 6.14325 10.7599 6.404 10.498C6.83515 10.7972 7.33723 10.9769 7.85958 11.0189C9.52813 11.0995 10.9538 9.82374 11.0659 8.14979C11.1311 6.47229 9.84641 5.05146 8.17763 4.95547L8.17763 4.95259Z" fill-rule="evenodd" clip-rule="evenodd"/></svg></span>
+                        <span class="btn__caption" hidden>MAX</span>
+                      </button>
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="telegram" data-link="https://t.me/+KW0u0SXoY_AyZTYy" aria-label="Telegram">
+                        <span class="btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 16 16">
+                            <path d="M6.84146 9.42722L6.66337 11.9321C6.91818 11.9321 7.02853 11.8227 7.16087 11.6913L8.3555 10.5496L10.8309 12.3623C11.2849 12.6154 11.6047 12.4821 11.7272 11.9447L13.3521 4.33123L13.3525 4.33078C13.4965 3.65969 13.1098 3.39726 12.6675 3.56189L3.11671 7.21836C2.46489 7.47136 2.47475 7.83472 3.0059 7.99935L5.44765 8.75882L11.1194 5.21002C11.3863 5.03327 11.629 5.13106 11.4293 5.30781L6.84146 9.42722Z"/>
+                          </svg>
+                        </span>
+                        <span class="btn__caption" hidden>Telegram</span>
+                      </button>
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="zen" data-link="https://zen.yandex.ru/id/5ea284dc0596fe5c973028b5" aria-label="Дзен">
+                        <span class="btn__icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M14 7.88171C13.9996 7.85267 13.9882 7.82486 13.968 7.80395C13.9478 7.78304 13.9204 7.77059 13.8914 7.76914C11.7387 7.68743 10.4284 7.41314 9.51179 6.496C8.59289 5.57771 8.31916 4.26629 8.23744 2.10857C8.23641 2.07951 8.22417 2.05198 8.20329 2.03174C8.18241 2.0115 8.15451 2.00013 8.12543 2H7.87399C7.84504 2.00054 7.81738 2.01205 7.79659 2.03221C7.7758 2.05236 7.76343 2.07965 7.76199 2.10857C7.68027 4.26571 7.40654 5.57771 6.48764 6.496C5.57046 7.41371 4.26125 7.68743 2.10858 7.76914C2.07942 7.77018 2.0518 7.7825 2.03155 7.8035C2.01129 7.8245 1.99998 7.85254 2 7.88171V8.13314C2.00054 8.16209 2.01205 8.18976 2.03221 8.21055C2.05236 8.23134 2.07966 8.2437 2.10858 8.24514C4.26125 8.32686 5.5716 8.60114 6.48821 9.51829C7.40483 10.4349 7.67856 11.7423 7.76085 13.8914C7.76256 13.9514 7.81228 14 7.87342 14H8.12543C8.15449 13.9996 8.18229 13.9882 8.2032 13.968C8.22412 13.9478 8.23656 13.9204 8.23801 13.8914C8.3203 11.7423 8.59403 10.4343 9.51064 9.51829C10.4284 8.60057 11.7376 8.32686 13.8903 8.24514C13.9194 8.24411 13.9471 8.23179 13.9673 8.21079C13.9876 8.18979 13.9989 8.16175 13.9989 8.13257V7.88114H14V7.88171Z"/></svg></span>
+                        <span class="btn__caption" hidden>Дзен</span>
+                      </button>
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="ok" data-link="https://www.ok.ru/group/53902033027279" aria-label="Одноклассники">
+                        <span class="btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 16 16">
+                            <path d="M4.0175 8.482C3.68213 9.14127 4.06291 9.45641 4.93172 9.99476C5.67032 10.4511 6.69068 10.6179 7.34612 10.6847L4.76321 13.1691C4.01149 13.8896 5.22169 15.0457 5.97287 14.3404L8.00648 12.3791C8.78501 13.1281 9.53127 13.8459 10.0401 14.3432C10.7918 15.0511 12.0015 13.9049 11.2579 13.1718C11.2021 13.1188 8.50216 10.5287 8.66684 10.6874C9.33048 10.6207 10.3355 10.4439 11.0654 9.9975L11.0648 9.99695C11.9336 9.45586 12.3144 9.14127 11.984 8.482C11.7843 8.10778 11.2459 7.79484 10.5292 8.33593C10.5292 8.33593 9.56136 9.07726 8.00046 9.07726C6.43901 9.07726 5.47172 8.33593 5.47172 8.33593C4.75555 7.7921 4.21501 8.10778 4.0175 8.482Z"/>
+                            <path d="M7.99936 8.07769C9.90221 8.07769 11.456 6.59065 11.456 4.76002C11.456 2.92174 9.90221 1.43469 7.99936 1.43469C6.09597 1.43469 4.54218 2.92174 4.54218 4.76002C4.54218 6.59065 6.09597 8.07769 7.99936 8.07769ZM7.99936 3.11924C8.93437 3.11924 9.69704 3.85291 9.69704 4.76002C9.69704 5.65947 8.93437 6.39314 7.99936 6.39314C7.06435 6.39314 6.30168 5.65947 6.30168 4.76002C6.30114 3.85237 7.06381 3.11924 7.99936 3.11924Z"/>
+                          </svg>
+                        </span>
+                        <span class="btn__caption" hidden>Одноклассники</span>
+                      </button>
+                      <button type="button" class="btn btn--size-xl btn--link social-item" data-network="youtube" data-link="https://www.youtube.com/channel/UCqLHyINirvgmNvyBI87mzjg" aria-label="YouTube">
+                        <span class="btn__icon" aria-hidden="true">
+                          <svg viewBox="0 0 16 16">
+                            <path d="M15.1811 4.32438C15.0085 3.6697 14.5025 3.15363 13.8609 2.97734C12.6887 2.65015 7.99983 2.65015 7.99983 2.65015C7.99983 2.65015 3.31114 2.65015 2.13895 2.96495C1.50965 3.14105 0.991354 3.66982 0.818738 4.32438C0.510254 5.52012 0.510254 7.99999 0.510254 7.99999C0.510254 7.99999 0.510254 10.4923 0.818738 11.6756C0.991518 12.3301 1.49731 12.8462 2.13904 13.0225C3.32348 13.3498 8.00002 13.3498 8.00002 13.3498C8.00002 13.3498 12.6887 13.3498 13.8609 13.035C14.5026 12.8588 15.0085 12.3427 15.1813 11.6881C15.4897 10.4923 15.4897 8.01255 15.4897 8.01255C15.4897 8.01255 15.502 5.5201 15.1811 4.32438ZM6.50698 10.2909V5.70897L10.406 7.99994L6.50698 10.2909Z"/>
+                          </svg>
+                        </span>
+                        <span class="btn__caption" hidden>YouTube</span>
+                      </button>
+                    </div>
+                  
+                    <button type="button" class="wg__plus wg__plus--up" aria-label="Добавить виджет сверху"></button>
+                    <button type="button" class="wg__plus wg__plus--down" aria-label="Добавить виджет снизу"></button>
+                    <button type="button" class="wg__plus wg__plus--left" aria-label="Добавить виджет слева"></button>
+                    <button type="button" class="wg__plus wg__plus--right" aria-label="Добавить виджет справа"></button>
+                    <div class="wg__toolbar">
+                      <div class="tb tb--style-success" role="toolbar" aria-label="Соцсети">
+                        <button type="button" class="tb__btn" aria-label="Назад"><span class="tb__icon" aria-hidden="true">&#xE9A9;</span></button>
+                        <button type="button" class="tb__btn" id="socialListToggle" aria-label="Список соцсетей" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialList">
+                          <span class="tb__icon" aria-hidden="true">&#xE708;</span>
+                          <span class="tb__caption">Соцсети</span>
+                        </button>
+                        <button type="button" class="tb__btn" id="socialAddToggle" aria-label="Добавить соцсеть" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialAdd"><span class="tb__icon" aria-hidden="true">&#xEADD;</span></button>
+                        <button type="button" class="tb__btn" id="socialStyleToggle" aria-label="Стиль соцсетей" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle"><span class="tb__icon" style="font-family:'cbuc-icons';font-size:20px" aria-hidden="true">&#xEBBB;</span></button>
+                        <button type="button" class="tb__btn" id="socialToolbarColorToggle" aria-label="Выбрать цвет соцсетей" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"><span class="tb__icon" aria-hidden="true"><i class="tb__sw"></i></span></button>
+                        <button type="button" class="tb__btn" aria-label="Настройка текста" hidden><span class="tb__icon" aria-hidden="true">&#xEAC9;</span></button>
+                        <button type="button" class="tb__btn" id="socialSizeToggle" aria-label="Настройка размера" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialSize" hidden><span class="tb__icon" aria-hidden="true">&#xE63E;</span></button>
+                        <button type="button" class="tb__btn" id="socialGeneralToggle" aria-label="Общие настройки" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialList"><span class="tb__icon" aria-hidden="true">&#xE61B;</span></button>
+                        <button type="button" class="tb__btn tb__btn--delete" aria-label="Удалить виджет"><span class="tb__icon" aria-hidden="true">&#xEB72;</span></button>
+                        <button type="button" class="tb__btn" aria-label="Ещё"><span class="tb__icon" aria-hidden="true">&#xEAB4;</span></button>
+                      </div>
+                      <svg class="social-size__symbols" width="0" height="0" aria-hidden="true">
+                        <symbol id="i-pad-h" viewBox="0 0 12 12"><g fill="currentColor"><rect x="0" y="1" width="1" height="10" rx=".5"/><rect x="11" y="1" width="1" height="10" rx=".5"/></g><rect x="3.5" y="3.5" width="5" height="5" rx="1.5" fill="none" stroke="currentColor"/></symbol>
+                        <symbol id="i-pad-v" viewBox="0 0 12 12"><g fill="currentColor"><rect x="1" y="0" width="10" height="1" rx=".5"/><rect x="1" y="11" width="10" height="1" rx=".5"/></g><rect x="3.5" y="3.5" width="5" height="5" rx="1.5" fill="none" stroke="currentColor"/></symbol>
+                      </svg>
+                      <section class="pe social-size" id="socialSize" role="dialog" aria-labelledby="socialSizeTitle" hidden>
+                        <header class="pe__head">
+                          <button type="button" class="pe__back" aria-label="Назад">&#xEB9E;</button>
+                          <h2 class="pe__name pe__name--static" id="socialSizeTitle">Размер</h2>
+                          <div class="pe__cmds">
+                            <button type="button" class="pe__reset" aria-label="Сбросить изменения" disabled>&#xE629;</button>
+                            <button type="submit" form="socialSizeForm" class="pe__done" aria-label="Сохранить и выйти">&#xE75E;</button>
+                            <button type="button" class="pe__close" aria-label="Закрыть">&#xE66C;</button>
+                          </div>
+                        </header>
+                        <form class="pe__body" id="socialSizeForm">
+                          <div class="pe__card social-size__dimensions">
+                            <label class="pe__label" for="socialWidth">Ширина</label>
+                            <div class="pe__dim">
+                              <input id="socialWidth" name="width" class="pe__dim-value" type="number" min="0" step="any" required>
+                              <select class="pe__dim-unit" name="widthMode" aria-label="Режим ширины"><option value="auto">по контенту</option><option value="px">px</option></select>
+                            </div>
+                            <label class="pe__label" for="socialHeight">Высота</label>
+                            <div class="pe__dim">
+                              <input id="socialHeight" name="height" class="pe__dim-value" type="number" min="0" step="any" required>
+                              <select class="pe__dim-unit" name="heightMode" aria-label="Режим высоты"><option value="auto">по контенту</option><option value="px">px</option></select>
+                            </div>
+                          </div>
+                          <div class="pe__card">
+                            <div class="pe__title">Отступы</div>
+                            <div class="social-size__spacing">
+                              <span class="pe__label">Внутренние</span>
+                              <div class="social-size__axes">
+                                <label class="pe__num" title="Слева / справа"><svg class="social-size__axis" width="12" height="12" aria-hidden="true"><use href="#i-pad-h"/></svg><input class="pe__num-value" name="paddingInline" aria-label="Внутренние слева / справа"></label>
+                                <label class="pe__num" title="Сверху / снизу"><svg class="social-size__axis" width="12" height="12" aria-hidden="true"><use href="#i-pad-v"/></svg><input class="pe__num-value" name="paddingBlock" aria-label="Внутренние сверху / снизу"></label>
+                              </div>
+                              <div class="social-size__sides" id="socialPaddingSides" hidden>
+                                <input class="social-size__side--top" name="paddingTop" inputmode="decimal" aria-label="Внутренний отступ сверху">
+                                <input class="social-size__side--left" name="paddingLeft" inputmode="decimal" aria-label="Внутренний отступ слева">
+                                <input class="social-size__side--right" name="paddingRight" inputmode="decimal" aria-label="Внутренний отступ справа">
+                                <input class="social-size__side--bottom" name="paddingBottom" inputmode="decimal" aria-label="Внутренний отступ снизу">
+                              </div>
+                              <button type="button" class="social-size__space-toggle" data-spacing="padding" aria-expanded="false" aria-controls="socialPaddingSides" aria-label="Внутренние отступы по сторонам">&#xEBCE;</button>
+                              <span class="pe__label">Внешние</span>
+                              <div class="social-size__axes">
+                                <label class="pe__num" title="Слева / справа"><svg class="social-size__axis" width="12" height="12" aria-hidden="true"><use href="#i-pad-h"/></svg><input class="pe__num-value" name="marginInline" aria-label="Внешние слева / справа"></label>
+                                <label class="pe__num" title="Сверху / снизу"><svg class="social-size__axis" width="12" height="12" aria-hidden="true"><use href="#i-pad-v"/></svg><input class="pe__num-value" name="marginBlock" aria-label="Внешние сверху / снизу"></label>
+                              </div>
+                              <div class="social-size__sides" id="socialMarginSides" hidden>
+                                <input class="social-size__side--top" name="marginTop" inputmode="decimal" aria-label="Внешний отступ сверху">
+                                <input class="social-size__side--left" name="marginLeft" inputmode="decimal" aria-label="Внешний отступ слева">
+                                <input class="social-size__side--right" name="marginRight" inputmode="decimal" aria-label="Внешний отступ справа">
+                                <input class="social-size__side--bottom" name="marginBottom" inputmode="decimal" aria-label="Внешний отступ снизу">
+                              </div>
+                              <button type="button" class="social-size__space-toggle" data-spacing="margin" aria-expanded="false" aria-controls="socialMarginSides" aria-label="Внешние отступы по сторонам">&#xEBCE;</button>
+                            </div>
+                          </div>
+                          <div class="pe__card">
+                            <label class="social-size__empty"><span class="pe__label">Скрывать без данных</span><input name="hideEmpty" type="checkbox" role="switch"></label>
+                          </div>
+                        </form>
+                      </section>
+                      <section class="pe social-list" id="socialList" role="dialog" aria-labelledby="socialListTitle" hidden>
+                        <svg class="social-list__filters" width="0" height="0" aria-hidden="true">
+                          <filter id="socialListIconColor" color-interpolation-filters="sRGB">
+                            <feFlood/>
+                            <feComposite in2="SourceAlpha" operator="in"/>
+                          </filter>
+                          <filter id="socialListReadonlyIconColor" color-interpolation-filters="sRGB">
+                            <feFlood/>
+                            <feComposite in2="SourceAlpha" operator="in"/>
+                          </filter>
+                        </svg>
+                        <header class="pe__head">
+                          <button type="button" class="pe__back" aria-label="Назад к списку" hidden>&#xEB9E;</button>
+                          <h2 class="pe__name pe__name--static" id="socialListTitle">Список</h2>
+                          <div class="pe__cmds">
+                            <button type="button" class="pe__reset" aria-label="Сбросить изменения">&#xE629;</button>
+                            <button type="button" class="pe__done" aria-label="Сохранить и выйти">&#xE75E;</button>
+                            <button type="button" class="pe__close" aria-label="Закрыть">&#xE66C;</button>
+                          </div>
+                        </header>
+                        <div class="pe__body" id="socialListBody">
+                          <div class="pe__card">
+                            <div class="input input--size-m social-list__context">
+                              <span class="input__body">
+                                <span class="input__field">
+                                  <input class="input__control" id="socialListContext" type="text" placeholder="Выбрать данные" aria-label="Данные из контекста" readonly>
+                                  <button type="button" class="input__icon" id="socialListClearContext" aria-label="Очистить данные из контекста" hidden>&#xE66C;</button>
+                                </span>
+                              </span>
+                              <button type="button" class="social-list__context-picker social-context-icon" id="socialListContextPicker" aria-label="Выбрать данные из контекста">&#xEA6E;</button>
+                            </div>
+                          </div>
+                          <div class="pe__card social-list__card" id="socialListManual">
+                            <div id="socialListRows"></div>
+                            <button type="button" class="btn btn--link btn--style-unaccented btn--size-m social-list__add" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialAdd"><span class="btn__icon" aria-hidden="true">&#xEADD;</span>Добавить</button>
+                          </div>
+                          <div class="social-settings" id="socialGeneralFields" hidden>
+                            <div class="pe__card social-settings__layout">
+                              <div class="social-settings__heading">Оформление</div>
+                              <div class="tumbler tumbler--size-m social-settings__direction" role="group" aria-label="Направление">
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" type="radio" name="socialDirection" value="row" aria-label="По горизонтали" checked disabled>
+                                  <span class="tumbler__icon" aria-hidden="true">&#xEAEE;</span>
+                                </label>
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" type="radio" name="socialDirection" value="column" aria-label="По вертикали" disabled>
+                                  <span class="tumbler__icon" aria-hidden="true">&#xEAC3;</span>
+                                </label>
+                              </div>
+                              <span class="social-settings__arrow" aria-hidden="true"></span>
+                              <span class="pe__label">Показывать</span>
+                              <div class="tumbler tumbler--size-m social-settings__show" role="group" aria-label="Содержимое пунктов">
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" type="radio" name="socialContent" value="icon" checked disabled>
+                                  <span class="tumbler__caption">Иконку</span>
+                                </label>
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" type="radio" name="socialContent" value="caption" disabled>
+                                  <span class="tumbler__caption">Текст и иконку</span>
+                                </label>
+                              </div>
+                            </div>
+                            <div class="pe__card social-settings__appearance" aria-label="Оформление пунктов">
+                              <span class="pe__label">Стиль</span>
+                              <div class="social-settings__style">
+                                <button type="button" class="btn btn--link btn--size-m btn--icon" id="socialItemStyle" aria-label="Стиль пунктов: Ссылка" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle">
+                                  <span class="btn__icon" aria-hidden="true">&#xE9E2;</span>
+                                  <span class="btn__caption" hidden>Ссылка</span>
+                                </button>
+                                <button type="button" class="social-settings__arrow" id="socialAppearanceToggle" aria-label="Настройки оформления" aria-expanded="false" aria-controls="socialAppearance"></button>
+                              </div>
+                              <span class="pe__label">Цвет</span>
+                              <div class="social-settings__color-controls" id="socialColorControls">
+                                <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font" id="socialColorModeToggle" aria-expanded="false" aria-controls="socialColorModes">
+                                  <span class="btn__caption">Свой</span>
+                                </button>
+                                <button type="button" class="social-settings__color" id="socialColorToggle" aria-label="Выбрать цвет" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"></button>
+                                <div class="pe__menu pe__menu-list social-settings__color-modes" id="socialColorModes" role="group" aria-label="Режим цвета" hidden>
+                                  <button type="button" class="pe__menu-item is-selected" data-color-mode="custom" aria-pressed="true"><span class="pe__menu-bullet" aria-hidden="true"></span><span class="social-color-mode__value">Свой</span></button>
+                                  <button type="button" class="pe__menu-item" data-color-mode="brand" aria-pressed="false"><span class="pe__menu-bullet" aria-hidden="true"></span><span class="social-color-mode__value">Брендированный</span></button>
+                                  <button type="button" class="close-button close-button--external close-button--size-m" id="socialColorModesClose" aria-label="Закрыть меню цвета"></button>
+                                </div>
+                              </div>
+                              <span class="pe__label">Шрифт</span>
+                              <div>
+                                <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font">
+                                  <span class="btn__caption">Основной текст</span>
+                                </button>
+                              </div>
+                              <span class="pe__label" id="socialItemSizeLabel">Размер</span>
+                              <div class="social-settings__size">
+                                <div class="social-settings__size-buttons" role="group" aria-labelledby="socialItemSizeLabel">
+                                  <button type="button" class="social-settings__step" data-social-size-step="-1" aria-label="Уменьшить размер пункта">&#xEAE5;</button>
+                                  <button type="button" class="social-settings__step" data-social-size-step="1" aria-label="Увеличить размер пункта">&#xEADD;</button>
+                                </div>
+                                <button type="button" class="social-settings__arrow" id="socialItemSizeToggle" aria-label="Настройка размера" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialSize"></button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="pe__body social-detail" id="socialDetail" hidden>
+                          <div class="pe__card social-detail__name">
+                            <span class="social-list__icon" id="socialDetailIcon"></span>
+                            <div class="input input--size-m social-detail__name-input">
+                              <span class="input__body">
+                                <span class="input__field">
+                                  <input class="input__control" id="socialDetailName" type="text" aria-label="Название соцсети" placeholder="Введите название соцсети">
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                          <div class="pe__card pe__rows social-detail__fields">
+                            <div class="pe__row">
+                              <label class="pe__label" for="socialDetailLink">По клику</label>
+                              <input class="social-detail__link" id="socialDetailLink" type="text" placeholder="https://">
+                            </div>
+                            <div class="pe__row">
+                              <span class="pe__label" id="socialDetailOpenLabel">Открывать</span>
+                              <div class="tumbler tumbler--size-m" role="group" aria-labelledby="socialDetailOpenLabel">
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" id="socialDetailTab" type="radio" name="socialDetailOpen" value="new">
+                                  <span class="tumbler__caption">В новом окне</span>
+                                </label>
+                                <label class="tumbler__item">
+                                  <input class="tumbler__input" id="socialDetailPage" type="radio" name="socialDetailOpen" value="page" checked>
+                                  <span class="tumbler__caption">На странице</span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="pe__body social-appearance" id="socialAppearance" hidden>
+                          <div class="social-appearance__states" aria-label="Состояния оформления">
+                            <span aria-current="true">В покое</span><span>При наведении</span><span>При нажатии</span>
+                          </div>
+                          <div class="pe__card social-appearance__card">
+                            <div class="social-appearance__row">
+                              <span class="pe__label">Скругления</span>
+                              <span class="pe__num"><span class="pe__corners" aria-hidden="true"></span><output id="socialAppearanceRadius">0</output></span>
+                              <span class="pe__corners social-appearance__end" aria-hidden="true"></span>
+                            </div>
+                            <div class="social-appearance__row">
+                              <span class="pe__label">Границы</span><span class="pe__swatch social-appearance__swatch" id="socialAppearanceBorder"></span>
+                              <span class="pe__corners social-appearance__end" aria-hidden="true"></span>
+                            </div>
+                          </div>
+                          <div class="pe__card social-appearance__card">
+                            <div class="social-appearance__row"><span class="pe__label">Фон</span><span class="pe__swatch social-appearance__swatch" id="socialAppearanceFill"></span></div>
+                            <div class="social-appearance__row"><span class="pe__label">Тень</span><span class="pe__swatch social-appearance__swatch is-empty"></span></div>
+                          </div>
+                          <div class="pe__card social-appearance__card">
+                            <div class="social-appearance__row"><strong>Шрифт</strong><span class="social-appearance__link">Основной текст</span></div>
+                            <div class="social-appearance__row">
+                              <span class="pe__num social-appearance__family">Inter <span aria-hidden="true">&#xE9AA;</span></span>
+                              <span class="pe__num">16</span>
+                            </div>
+                            <div class="social-appearance__format" aria-hidden="true"><span>&#xE6C3;</span><span>&#xE6C6;</span><span>&#xE6CE;</span><span>&#xE6CB;</span></div>
+                          </div>
+                          <div class="pe__card social-appearance__card">
+                            <div class="social-appearance__row"><span class="pe__label">Текст</span><span class="pe__swatch social-appearance__swatch" id="socialAppearanceText"></span></div>
+                          </div>
+                          <div class="pe__card social-appearance__card">
+                            <div class="social-appearance__row">
+                              <strong>Иконка</strong><span class="pe__swatch social-appearance__swatch" id="socialAppearanceIcon"></span><span class="pe__num"><output id="socialAppearanceIconSize">24</output></span>
+                              <span class="pe__label social-appearance__end">Отступ</span><span class="pe__num">4</span>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      <section class="pe social-color" id="socialColor" role="dialog" aria-labelledby="socialColorTitle" hidden>
+                        <header class="pe__head">
+                          <h2 class="pe__name pe__name--static" id="socialColorTitle">Цвет</h2>
+                          <div class="pe__cmds">
+                            <button type="button" class="pe__pop-tool pe__pop-eyedrop" aria-label="Пипетка" disabled></button>
+                            <button type="button" class="pe__reset" aria-label="Сбросить цвет">&#xE629;</button>
+                            <button type="submit" class="pe__done" form="socialColorForm" aria-label="Применить цвет">&#xE75E;</button>
+                            <button type="button" class="pe__close" aria-label="Закрыть">&#xE66C;</button>
+                          </div>
+                        </header>
+                        <form class="pe__body" id="socialColorForm">
+                          <div class="pe__card social-color__code">
+                            <span class="social-color__current" aria-hidden="true"></span>
+                            <span class="pe__label">HEX</span>
+                            <input class="pe__num-value" name="hex" type="text" placeholder="#" maxlength="7" spellcheck="false" aria-label="Код цвета">
+                            <div class="social-color__opacity">
+                              <input class="pe__num-value" name="opacity" type="number" min="0" max="100" required aria-label="Непрозрачность, %">
+                              <span class="pe__label" aria-hidden="true">%</span>
+                            </div>
+                          </div>
+                          <div class="pe__card social-color__presets">
+                            <div class="pe__palette" id="socialColorPalette" role="group" aria-label="Палитра"></div>
+                            <button type="button" class="btn btn--link btn--style-link btn--size-m" id="socialColorOther">
+                              <span class="btn__caption">Другой цвет</span>
+                            </button>
+                            <input class="pe__pop-native" name="nativeColor" type="color" tabindex="-1" aria-hidden="true">
+                          </div>
+                        </form>
+                      </section>
+                      <div class="social-add" id="socialAdd" role="dialog" aria-labelledby="socialAddTitle" hidden>
+                        <div class="social-add__header">
+                          <h2 id="socialAddTitle">Выберите соцсеть</h2>
+                          <button type="button" class="social-add__close" aria-label="Закрыть">
+                            <img src="assets/social-menu/close.svg" width="32" height="32" alt="">
+                          </button>
+                        </div>
+                        <div class="social-add__list">
+                          <button type="button" class="social-add__item" data-network="vkontakte">
+                            <span class="social-add__icon"><img src="assets/social-menu/vkontakte.svg" width="24" height="24" alt=""></span><span>ВКонтакте</span>
+                          </button>
+                          <button type="button" class="social-add__item" data-network="ok">
+                            <span class="social-add__icon"><img src="assets/social-menu/ok.svg" width="20" height="20" alt=""></span><span>Одноклассники</span>
+                          </button>
+                          <button type="button" class="social-add__item" data-network="telegram">
+                            <span class="social-add__icon"><img src="assets/social-menu/telegram.svg" width="24" height="24" alt=""></span><span>Telegram</span>
+                          </button>
+                          <button type="button" class="social-add__item" data-network="zen">
+                            <span class="social-add__icon"><img src="assets/social-menu/zen.svg" width="20" height="20" alt=""></span><span>Дзен</span>
+                          </button>
+                          <button type="button" class="social-add__item" data-network="max">
+                            <span class="social-add__icon"><img src="assets/social-menu/max.svg" width="20" height="20" alt=""></span><span>Max</span>
+                          </button>
+                        </div>
+                        <div class="social-add__list social-add__extra" id="socialAddExtra" hidden>
+                          <button type="button" class="social-add__item" data-network="whatsapp"><span class="social-add__icon"><img src="assets/social-menu/whatsapp.svg" width="24" height="24" alt=""></span><span>WhatsApp</span></button>
+                          <button type="button" class="social-add__item" data-network="rutube"><span class="social-add__icon"><img src="assets/social-menu/rutube.svg" width="24" height="24" alt=""></span><span>Rutube</span></button>
+                          <button type="button" class="social-add__item" data-network="pinterest"><span class="social-add__icon"><img src="assets/social-menu/pinterest.svg" width="24" height="24" alt=""></span><span>Pinterest</span></button>
+                          <button type="button" class="social-add__item" data-network="viber"><span class="social-add__icon"><img src="assets/social-menu/viber.svg" width="24" height="24" alt=""></span><span>Viber</span></button>
+                          <button type="button" class="social-add__item" data-network="youtube"><span class="social-add__icon"><img src="assets/social-menu/youtube.svg" width="24" height="24" alt=""></span><span>YouTube</span></button>
+                          <button type="button" class="social-add__item" data-network="facebook"><span class="social-add__icon"><img src="assets/social-menu/facebook.svg" width="24" height="24" alt=""></span><span>Facebook</span></button>
+                          <button type="button" class="social-add__item" data-network="instagram"><span class="social-add__icon"><img src="assets/social-menu/instagram.svg" width="24" height="24" alt=""></span><span>Instagram</span></button>
+                          <button type="button" class="social-add__item" data-network="tiktok"><span class="social-add__icon"><img src="assets/social-menu/tiktok.svg" width="24" height="24" alt=""></span><span>TikTok</span></button>
+                          <button type="button" class="social-add__item" data-network="tel"><span class="social-add__icon social-add__glyph" aria-hidden="true">&#xE638;</span><span>Телефон</span></button>
+                          <button type="button" class="social-add__item" data-network="email"><span class="social-add__icon social-add__glyph" aria-hidden="true">&#xE65E;</span><span>Почта</span></button>
+                          <button type="button" class="social-add__item" data-network="site"><span class="social-add__icon social-add__glyph" aria-hidden="true">&#xE6A7;</span><span>Сайт</span></button>
+                        </div>
+                        <button type="button" class="social-add__more" aria-label="Показать ещё соцсети" aria-expanded="false" aria-controls="socialAddExtra">
+                          <img src="assets/social-menu/more.svg" width="38" height="12" alt="">
+                          <img src="assets/social-menu/less.svg" width="38" height="12" alt="" hidden>
+                        </button>
+                      </div>
+                      <div class="social-style social-style--networks" id="socialStyle" role="dialog" aria-label="Стиль соцсетей" hidden>
+                        <button type="button" class="social-style__close close-button close-button--external close-button--size-m" aria-label="Закрыть окно стилей"></button>
+                        <div class="social-style__previews" id="socialStylePreviews"></div>
+                        <div id="socialStyleSwitchPresets" hidden>
+                          <label class="social-style__switch">
+                            <span>Брендированные цвета</span>
+                            <input type="checkbox" id="socialStyleBrandSwitch" role="switch">
+                          </label>
+                          <div class="social-style__group" id="socialStyleSwitchButtons" role="group" aria-labelledby="socialStyleSwitchButtonsTitle">
+                            <div class="social-style__heading" id="socialStyleSwitchButtonsTitle">Кнопка</div>
+                          </div>
+                          <div class="social-style__group" id="socialStyleSwitchLinks" role="group" aria-labelledby="socialStyleSwitchLinksTitle">
+                            <div class="social-style__heading" id="socialStyleSwitchLinksTitle">Ссылка</div>
+                          </div>
+                        </div>
+                        <div id="socialStyleGroupedPresets" hidden>
+                          <div class="social-style__group" id="socialStyleCustomGroup" role="group" aria-labelledby="socialStyleCustomTitle">
+                            <div class="social-style__heading" id="socialStyleCustomTitle">Свой цвет</div>
+                          </div>
+                          <div class="social-style__group" id="socialStyleBrandGroup" role="group" aria-labelledby="socialStyleBrandTitle">
+                            <div class="social-style__heading" id="socialStyleBrandTitle">Брендированные цвета</div>
+                          </div>
+                        </div>
+                        <div id="socialButtonPresets" hidden>
+                        <div class="social-style__group" role="group" aria-labelledby="socialButtonStyles">
+                          <div class="social-style__heading" id="socialButtonStyles">Кнопка</div>
+                          <button type="button" class="social-style__option" aria-label="Круглая кнопка с рамкой" aria-pressed="false"><span class="btn btn--size-m btn--outlined social-button--round" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Круглая кнопка с заливкой" aria-pressed="false"><span class="btn btn--size-m btn--filled social-button--round" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Скруглённая кнопка с рамкой" aria-pressed="false"><span class="btn btn--size-m btn--outlined social-button--rounded" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Скруглённая кнопка с заливкой" aria-pressed="false"><span class="btn btn--size-m btn--filled social-button--rounded" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Прямоугольная кнопка с рамкой" aria-pressed="false"><span class="btn btn--size-m btn--outlined social-button--square" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Прямоугольная кнопка с заливкой" aria-pressed="false"><span class="btn btn--size-m btn--filled social-button--square" aria-hidden="true">О нас</span></button>
+                        </div>
+                        <div class="social-style__group" role="group" aria-labelledby="socialLinkStyles">
+                          <div class="social-style__heading" id="socialLinkStyles">Ссылка</div>
+                          <button type="button" class="social-style__option" aria-label="Ссылка" aria-pressed="true"><span class="btn btn--size-m btn--link" aria-hidden="true">О нас</span></button>
+                          <button type="button" class="social-style__option" aria-label="Ссылка с подчёркиванием" aria-pressed="false"><span class="btn btn--size-m btn--link btn--underline" aria-hidden="true">О нас</span></button>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                    </div>
+                  </div>
+                  <div class="foot__row3 stk stk--h">
+                    <div class="foot__copy"><span>© 2003-2026 Тензор, Saby</span></div>
+                  </div>
+                </footer>
+                </section>
+
+              </div>
+            </div>
+          </div>
+          <div class="drag drag--r" id="dragR" aria-label="Изменить ширину страницы"><i class="drag__btn"></i><i class="drag__line"></i></div>
+        </div>
+      </main>
+
+      <!-- Правый сайдбар 56px — из проекта «Генерация дашборда» -->
+      <aside class="env-side">
+        <div class="env-side__nav">
+          <span class="env-side__i env-side__i--primary"><i class="g g--24">&#xEADD;</i></span>
+          <span class="env-side__i"><i class="g g--20">&#xEBBC;</i></span>
+          <span class="env-side__i"><i class="g g--20">&#xEBF9;</i></span>
+          <span class="env-side__i"><i class="g g--24">&#xE94C;</i></span>
+          <span class="env-side__i"><i class="g g--20">&#xEAA7;</i></span>
+          <span class="env-side__i"><i class="g g--24">&#xEAA9;</i></span>
+          <span class="env-side__i env-side__i--more"><i class="g g--24">&#xE9D9;</i></span>
+          <span class="env-side__fold" aria-hidden="true"><i class="g g--20">&#xEBFA;</i></span>
+        </div>
+        <span class="env-help">?</span>
+      </aside>
+
+    </div>
+  </div>
+</div>
+<template id="socialScenarioTemplate">
+  <div class="df-card df-card--scen social-scenarios" id="socialScenarioGroups">
+    <section aria-labelledby="socialItemScenariosTitle">
+      <h2 class="df-group" id="socialItemScenariosTitle">Настройка пунктов</h2>
+      <div class="df-options" role="radiogroup" aria-labelledby="socialItemScenariosTitle">
+        <label class="social-scenarios__option"><input type="radio" name="socialItemScenario" value="always-visible" checked><span>Список сетей всегда виден</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialItemScenario" value="always-add"><span>Всегда можно добавлять сеть</span></label>
+      </div>
+    </section>
+    <section aria-labelledby="socialAppearanceScenariosTitle">
+      <h2 class="df-group" id="socialAppearanceScenariosTitle">Настройка оформления</h2>
+      <div class="df-options" role="radiogroup" aria-labelledby="socialAppearanceScenariosTitle">
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="mixed" checked><span>Брендированные и монохром вместе</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="brand-switch"><span>Переключатель на брендированные цвета</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="grouped"><span>Разбит на группы</span></label>
+      </div>
+    </section>
+  </div>
+</template>
+<script src="vendor/ui-kit/components/demo-frame/demo-frame.js"></script>
+<script src="vendor/ui-kit/components/builder-header/builder-header.js?v=3"></script>
+<script src="vendor/ui-kit/components/left-sidebar/left-sidebar.js"></script>
+<script src="app.js?v=50"></script>
+</body>
+</html>
