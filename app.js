@@ -61,6 +61,7 @@
   const socialColorModes = $('socialColorModes');
   const socialColorForm = $('socialColorForm');
   const socialListRows = $('socialListRows');
+  const socialListManual = $('socialListManual');
   const socialListContext = $('socialListContext');
   const socialListContextPicker = $('socialListContextPicker');
   const socialListClearContext = $('socialListClearContext');
@@ -855,7 +856,7 @@
     socialListToggleIcon.textContent = value ? '\uEA6E' : '\uE708';
     socialListToggleIcon.classList.toggle('social-context-icon', Boolean(value));
     socialListToggleCaption.textContent = value.split('.').at(-1).trim() || 'Соцсети';
-    socialAddToggle.hidden = Boolean(value) && itemScenario === 'always-visible';
+    socialAddToggle.hidden = Boolean(value) && itemScenario !== 'always-add';
   }
 
   function selectSocialListContext() {
@@ -877,6 +878,7 @@
   function renderSocialList(reposition = true) {
     const bound = Boolean(socialListContext.value);
     const allowContextAdd = bound && itemScenario === 'always-add';
+    socialListManual.hidden = bound && itemScenario === 'hide-with-context';
     socialListAdd.hidden = bound && !allowContextAdd;
     socialListAdd.setAttribute('aria-haspopup', draftRemovedItem && !bound ? 'false' : 'dialog');
     socialListRows.replaceChildren();
@@ -1053,7 +1055,7 @@
     if (restoreFocus) {
       const rowTrigger = detailTrigger.isConnected ? detailTrigger
         : socialListRows.children[rowIndex]?.querySelector('button.social-list__open');
-      const trigger = rowTrigger ?? socialList.querySelector('.pe__close');
+      const trigger = rowTrigger && !socialListManual.hidden ? rowTrigger : socialList.querySelector('.pe__close');
       trigger.focus({ preventScroll: true });
     }
     detailTrigger = null;
