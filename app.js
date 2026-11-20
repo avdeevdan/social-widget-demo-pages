@@ -517,7 +517,7 @@
   const colorFields = socialColorForm.elements;
   const colorReset = socialColor.querySelector('.pe__reset');
   const defaultSocialColor = getComputedStyle(sel).getPropertyValue('--page-accent').trim();
-  const colorPresets = ['#656c87', '#000000', '#999999', '#8991a9', '#2562aa', '#5a49ab', '#cc3d00', '#c2140a', '#298e3c'];
+  const colorPresets = [defaultSocialColor, '#656c87', '#000000', '#999999', '#8991a9', '#2562aa', '#5a49ab', '#cc3d00', '#c2140a', '#298e3c'];
 
   function socialColorValue(color) {
     if (!color) return '';
@@ -643,22 +643,21 @@
     closeSocialColor(true);
   }
 
-  function renderColorPresets(activeColor) {
-    const colors = [activeColor, ...colorPresets.filter((hex) => hex !== activeColor.hex)
-      .map((hex) => ({ hex, opacity: 100 }))];
-    $('socialColorPalette').replaceChildren(...colors.map((color, index) => {
+  function renderColorPresets() {
+    $('socialColorPalette').replaceChildren(...colorPresets.map((hex) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'pe__pal';
-      button.setAttribute('aria-label', index === 0 ? 'Текущий цвет ' + color.hex : color.hex);
-      button.style.setProperty('--pe-color', socialColorValue(color));
+      button.setAttribute('aria-label', hex);
+      button.style.setProperty('--pe-color', hex);
       button.addEventListener('click', () => {
-        const opacity = index === 0 ? color.opacity : readSocialColorFields()?.opacity ?? 100;
-        applySocialColor({ hex: color.hex, opacity });
+        const opacity = readSocialColorFields()?.opacity ?? 100;
+        applySocialColor({ hex, opacity });
       });
       return button;
     }));
   }
+  renderColorPresets();
 
   function openSocialColor({ currentTarget: trigger }) {
     closeColorModes(false);
@@ -675,7 +674,6 @@
     activeColorTrigger = trigger;
     const activeColor = (fromToolbar ? itemColor : draftItemColor) ?? { hex: defaultSocialColor, opacity: 100 };
     updateSocialColorFields(activeColor);
-    renderColorPresets(activeColor);
     socialColor.hidden = false;
     positionSocialColor();
     setPopupTrigger(trigger, true);
