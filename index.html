@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
-<link rel="stylesheet" href="styles.css?v=65">
+<link rel="stylesheet" href="styles.css?v=66">
 </head>
 <body>
 <div id="stage" class="stage">
@@ -413,8 +413,10 @@
                         <header class="pe__head">
                           <h2 class="pe__name pe__name--static" id="socialColorTitle">Цвет</h2>
                           <div class="pe__cmds">
-                            <button type="button" class="pe__pop-tool pe__pop-eyedrop" aria-label="Пипетка" disabled></button>
-                            <button type="button" class="pe__reset" aria-label="Сбросить цвет">&#xE629;</button>
+                            <div class="social-color__tools">
+                              <button type="button" class="pe__pop-tool" aria-label="Пипетка" disabled><img src="assets/social-settings/color-eyedropper.svg" width="16" height="16" alt=""></button>
+                              <button type="button" class="pe__reset" aria-label="Сбросить цвет">&#xE629;</button>
+                            </div>
                             <button type="submit" class="pe__done" form="socialColorForm" aria-label="Применить цвет">&#xE75E;</button>
                             <button type="button" class="pe__close" aria-label="Закрыть">&#xE66C;</button>
                           </div>
@@ -422,18 +424,24 @@
                         <form class="pe__body" id="socialColorForm">
                           <div class="pe__card social-color__code">
                             <span class="social-color__current" aria-hidden="true"></span>
-                            <span class="pe__label">HEX</span>
-                            <input class="pe__num-value" name="hex" type="text" placeholder="#" maxlength="7" spellcheck="false" aria-label="Код цвета">
-                            <div class="social-color__opacity">
-                              <input class="pe__num-value" name="opacity" type="number" min="0" max="100" required aria-label="Непрозрачность, %">
-                              <span class="pe__label" aria-hidden="true">%</span>
+                            <div class="social-color__editors">
+                              <label class="social-color__format" for="socialColorHex">HEX<span aria-hidden="true">&#xE9AA;</span></label>
+                              <div class="social-color__values">
+                                <input class="pe__num-value" id="socialColorHex" name="hex" type="text" placeholder="#" maxlength="7" spellcheck="false" aria-label="Код цвета HEX">
+                                <label class="social-color__opacity">
+                                  <input class="pe__num-value" name="opacity" type="number" min="0" max="100" required aria-label="Непрозрачность, %">
+                                  <span aria-hidden="true">%</span>
+                                </label>
+                              </div>
                             </div>
                           </div>
                           <div class="pe__card social-color__presets">
                             <div class="pe__palette" id="socialColorPalette" role="group" aria-label="Палитра"></div>
-                            <button type="button" class="btn btn--link btn--style-link btn--size-m" id="socialColorOther">
-                              <span class="btn__caption">Другой цвет</span>
-                            </button>
+                            <div class="social-color__links">
+                              <button type="button" class="btn btn--link btn--style-secondary btn--size-m" id="socialColorOther">
+                                <span class="btn__caption">Другой цвет</span>
+                              </button>
+                            </div>
                             <input class="pe__pop-native" name="nativeColor" type="color" tabindex="-1" aria-hidden="true">
                           </div>
                         </form>

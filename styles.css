@@ -458,46 +458,71 @@ button.social-settings__arrow:active { background: var(--background-contrast-pal
   --pe-color: linear-gradient(135deg, transparent 48%, var(--border-unaccented_border-color) 49% 51%, transparent 52%);
 }
 .social-appearance__swatch { cursor: default; }
-.social-color.pe { position: absolute; z-index: 103; width: 366px; }
-.social-color .pe__head { height: 56px; }
+.social-color.pe {
+  position: absolute;
+  z-index: 103;
+  width: 366px;
+  border-radius: var(--border-radius-border-radius_m);
+  box-shadow: 0 0 calc(var(--blur-shadow-blur_a2) / 2) var(--color-shadow-color_a),
+              0 0 calc(var(--blur-shadow-blur_a) / 2) var(--color-shadow-color_a);
+}
+.social-color.pe .pe__head { height: 56px; padding-left: var(--offset-offset_l); }
+.social-color .pe__name {
+  font-size: var(--font-font-size-font-size_2xl);
+  font-weight: var(--font-font-weight-regular);
+}
+.social-color__tools { display: flex; align-items: center; gap: var(--offset-offset_xs); }
+.social-color__tools .pe__reset { width: var(--inline_height-inline_height_l); height: var(--inline_height-inline_height_l); }
 .social-color__code {
-  display: grid;
-  grid-template-columns: 70px max-content 84px 60px;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
 }
 .social-color__current {
   display: block;
+  flex: none;
+  width: 70px;
   height: 32px;
   border: 1px solid var(--border-unaccented_border-color);
   border-radius: 18px;
-  background: var(--social-color-preview);
+  background: linear-gradient(var(--social-color-preview, transparent), var(--social-color-preview, transparent)),
+              url("assets/social-settings/color-checkerboard.png") left top / 10px 10px;
 }
-.social-color__code > .pe__num-value {
+.social-color__editors, .social-color__values, .social-color__opacity, .social-color__format {
+  display: flex;
+  align-items: center;
+}
+.social-color__editors { gap: var(--offset-offset_s); }
+.social-color__values { gap: var(--offset-offset_2xs); }
+.social-color__format, .social-color__values .pe__num-value {
   height: var(--inline_height-inline_height_m);
+  padding: 3px 0 0;
   border-bottom: 1px solid var(--border-unaccented_border-color);
-  font-family: inherit;
+  color: var(--text-text-color);
 }
-.social-color__opacity { display: flex; align-items: center; gap: var(--offset-offset_xs); }
+.social-color__values .pe__num-value:focus { border-bottom-color: var(--border-unaccented_hover_border-color); }
+.social-color__format { justify-content: space-between; flex: none; width: 46px; }
+.social-color__format span {
+  color: var(--icon-unaccented_icon-color);
+  font: var(--icon-icon_size-icon-size_s)/1 var(--icon-font-family-s_icon_font-family);
+}
+.social-color__values > .pe__num-value { flex: none; width: 66px; }
 .social-color__opacity .pe__num-value {
-  height: var(--inline_height-inline_height_m);
-  width: 40px;
   flex: none;
-  border-bottom: 1px solid var(--border-unaccented_border-color);
+  width: 26px;
+  text-align: right;
   appearance: textfield;
 }
-.social-color__opacity .pe__label { flex: none; }
+.social-color__opacity span { padding-top: 3px; width: 11px; }
 .social-color__code input::-webkit-inner-spin-button { appearance: none; }
-.social-color__presets .pe__palette { gap: 8px 6px; padding-block: 4px 14px; }
-.social-color__presets > .btn { align-self: flex-start; padding-inline: 0; }
-.social-color__presets .pe__palette::after {
-  content: "";
-  height: 1px;
-  margin: 8px 12px 0;
-  flex: 1 0 calc(100% - 24px);
-  background: var(--border-border-color);
+.social-color__presets { gap: 0; padding-block: var(--offset-offset_m); }
+.social-color__presets .pe__palette { gap: var(--offset-offset_s) var(--offset-offset_xs); padding-bottom: var(--offset-offset_3xs); }
+.social-color__links {
+  margin-top: var(--offset-offset_l);
+  padding: var(--offset-offset_m) 0 0 var(--offset-offset_3xs);
+  border-top: 1px solid var(--border-border-color);
 }
+.social-color__links .btn { padding-inline: 0; }
 .social-settings__size { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
 .social-settings__size-buttons { display: flex; gap: 4px; }
 .social-settings__step { font: 14px/1 "cbuc-icons"; }
