@@ -139,17 +139,16 @@
     { label: 'Кнопка-ссылка', shortLabel: 'Ссылка', classes: 'btn--link' },
     { label: 'Контурная круглая', classes: 'btn--outlined social-button--round' },
     { label: 'Контурная квадратная со скруглением', classes: 'btn--outlined social-button--rounded' },
-    { label: 'Контурная квадратная', classes: 'btn--outlined social-button--square' },
     { label: 'Залитая круглая', classes: 'btn--filled social-button--round' },
     { label: 'Залитая квадратная со скруглением', classes: 'btn--filled social-button--rounded' },
-    { label: 'Залитая квадратная', classes: 'btn--filled social-button--square' },
   ];
   addStyleOptions(socialStylePreviews, socialPresets, 'social-style__preview-row');
   markSocialStyle(socialStylePreviews, socialStylePreviews.firstElementChild);
-  const switchButtonPresets = [1, 4, 2, 5, 3, 6].map((index) => shapePresets[index]);
+  const switchButtonPresets = [1, 3, 2, 4].map((index) => shapePresets[index]);
   addStyleOptions($('socialStyleSwitchButtons'), switchButtonPresets, 'social-style__tile');
   addStyleOptions($('socialStyleSwitchLinks'), [shapePresets[0]], 'social-style__tile');
-  const groupedPresets = [shapePresets[0], shapePresets[1], shapePresets[4], shapePresets[3]];
+  const groupedPresets = [shapePresets[0], shapePresets[1], shapePresets[3],
+    { label: 'Квадратная со скруглением', classes: 'btn--square' }];
   addStyleOptions($('socialStyleCustomGroup'), groupedPresets, 'social-style__tile');
   addStyleOptions($('socialStyleBrandGroup'), groupedPresets.map((preset) => ({
     ...preset, classes: preset.classes + ' social-button--brand',

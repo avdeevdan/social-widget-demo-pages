@@ -204,6 +204,11 @@ body.is-resizing{cursor:ew-resize;user-select:none}
 .social-item:not(:has(> .btn__caption:not([hidden]))) { width: var(--btn-h); padding: 0; }
 .social-item.btn--outlined, .social-style__sample.btn--outlined, #socialItemStyle.btn--outlined { --btn-ic-r: var(--s-icon); }
 .social-button--tinted.btn--outlined { --btn-bg-r: var(--s-tint); }
+.btn--square:is(.social-item, .social-style__sample, #socialItemStyle) {
+  --s-same: var(--s-tint);
+  --s-same-h: color-mix(in srgb, var(--s-fill) 22%, #fff);
+  --s-same-a: color-mix(in srgb, var(--s-fill) 30%, #fff);
+}
 .social-item {
   --btn-bg-h: var(--btn-bg-r);
   --btn-bd-h: var(--btn-bd-r);
