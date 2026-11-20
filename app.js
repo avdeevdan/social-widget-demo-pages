@@ -40,7 +40,6 @@
   const socialStyleBrandSwitch = $('socialStyleBrandSwitch');
   const socialStyleGroupedPresets = $('socialStyleGroupedPresets');
   const socialButtonPresets = $('socialButtonPresets');
-  const socialAddToggle = $('socialAddToggle');
   const socialAdd = $('socialAdd');
   const constructor = $('app');
   const socialList = $('socialList');
@@ -94,7 +93,6 @@
   let activeColorTrigger = socialColorToggle;
   let activeStyleTrigger = socialStyleToggle;
   let previousButtonStyle = null;
-  let socialAddTrigger = socialAddToggle;
   const itemSizes = ['m', 'xl', '5xl'];
   let itemSize = 'xl';
   let draftItemSize = itemSize;
@@ -297,7 +295,7 @@
     if (popup.hidden) return;
     const bounds = constructor.getBoundingClientRect();
     const gap = 8;
-    if (popup === socialAdd && trigger !== socialAddToggle) {
+    if (popup === socialAdd) {
       const plus = trigger.querySelector('.btn__icon').getBoundingClientRect();
       const heading = $('socialAddTitle');
       const title = heading.getBoundingClientRect();
@@ -327,18 +325,12 @@
       popup.style.top = Math.max(gap, top) + 'px';
       return;
     }
-    const below = toolbar.bottom - bounds.top + gap;
-    const above = toolbar.top - bounds.top - gap - popup.offsetHeight;
-    const top = below + popup.offsetHeight <= constructor.clientHeight - gap ? below : above;
-    popup.style.top = Math.max(gap, top) + 'px';
-    const left = Math.min(toolbar.left - 6 - bounds.left, constructor.clientWidth - popup.offsetWidth - gap);
-    popup.style.left = Math.max(gap, left) + 'px';
   }
 
   function positionSocialPopups() {
     positionConstructorPopup(socialList, activeListTrigger);
     positionSocialStyle();
-    positionConstructorPopup(socialAdd, socialAddTrigger);
+    positionConstructorPopup(socialAdd, socialListAdd);
     positionSocialSize();
     positionSocialColor();
     positionColorModes();
@@ -717,24 +709,22 @@
 
   function closeSocialAdd(restoreFocus) {
     socialAdd.hidden = true;
-    setPopupTrigger(socialAddTrigger, false);
-    if (restoreFocus) socialAddTrigger.focus({ preventScroll: true });
+    setPopupTrigger(socialListAdd, false);
+    if (restoreFocus) socialListAdd.focus({ preventScroll: true });
   }
 
-  function openSocialAdd(event) {
+  function openSocialAdd() {
     if (!socialAdd.hidden) {
       closeSocialAdd(true);
       return;
     }
     closeSocialStyle(false);
     closeSocialSize(false);
-    socialAddTrigger = event.currentTarget;
     socialAdd.hidden = false;
-    setPopupTrigger(socialAddTrigger, true);
-    positionConstructorPopup(socialAdd, socialAddTrigger);
+    setPopupTrigger(socialListAdd, true);
+    positionConstructorPopup(socialAdd, socialListAdd);
     socialAdd.querySelector('.social-add__item').focus({ preventScroll: true });
   }
-  socialAddToggle.addEventListener('click', openSocialAdd);
   socialAdd.querySelector('.social-add__close').addEventListener('click', () => closeSocialAdd(true));
   socialAddMore.addEventListener('click', () => {
     const expanded = socialAddExtra.hidden;
@@ -743,13 +733,13 @@
     socialAddMore.setAttribute('aria-label', expanded ? 'Скрыть дополнительные соцсети' : 'Показать ещё соцсети');
     socialAddMore.firstElementChild.hidden = expanded;
     socialAddMore.lastElementChild.hidden = !expanded;
-    positionConstructorPopup(socialAdd, socialAddTrigger);
+    positionConstructorPopup(socialAdd, socialListAdd);
     if (expanded) socialAddExtra.querySelector('.social-add__item').focus({ preventScroll: true });
   });
 
   socialAdd.addEventListener('click', (event) => {
     const option = event.target.closest('[data-network]');
-    if (!option) return;
+    if (!option || socialList.hidden) return;
     const label = option.lastElementChild.textContent;
     const button = document.createElement('button');
     button.type = 'button';
@@ -778,20 +768,14 @@
     caption.textContent = label;
     button.append(icon, caption);
     applyItemPresentation(button);
-    if (!socialList.hidden) {
-      const bound = Boolean(socialListContext.value);
-      const entry = { button, value: '', hidden: false, manual: true };
-      listDraft.push(entry);
-      renderSocialList();
-      closeSocialAdd(!bound);
-      if (bound) {
-        const row = socialListRows.lastElementChild;
-        openSocialDetail(entry, row.querySelector('img'), row.querySelector('.social-list__open'));
-      }
-    } else {
-      socialItems.append(button);
-      toBottom();
-      closeSocialAdd(true);
+    const bound = Boolean(socialListContext.value);
+    const entry = { button, value: '', hidden: false, manual: true };
+    listDraft.push(entry);
+    renderSocialList();
+    closeSocialAdd(!bound);
+    if (bound) {
+      const row = socialListRows.lastElementChild;
+      openSocialDetail(entry, row.querySelector('img'), row.querySelector('.social-list__open'));
     }
   });
 
@@ -824,9 +808,9 @@
     socialListAdd.focus({ preventScroll: true });
   }
 
-  function addListItem(event) {
+  function addListItem() {
     if (!draftRemovedItem || socialListContext.value) {
-      openSocialAdd(event);
+      openSocialAdd();
       return;
     }
     const { entry, index } = draftRemovedItem;
@@ -856,7 +840,6 @@
     socialListToggleIcon.textContent = value ? '\uEA6E' : '\uE708';
     socialListToggleIcon.classList.toggle('social-context-icon', Boolean(value));
     socialListToggleCaption.textContent = value.split('.').at(-1).trim() || 'Соцсети';
-    socialAddToggle.hidden = Boolean(value) && itemScenario !== 'always-add';
   }
 
   function selectSocialListContext() {
@@ -1062,6 +1045,7 @@
   }
 
   function closeSocialList(restoreFocus) {
+    closeSocialAdd(false);
     closeSocialColor();
     closeColorModes(false);
     closeSocialAppearance(false);
@@ -1292,7 +1276,7 @@
     if (!insideStyle && !activeStyleTrigger.contains(event.target)) {
       closeSocialStyle(false);
     }
-    if (!socialAdd.hidden && !socialAdd.contains(event.target) && !socialAddTrigger.contains(event.target)) {
+    if (!socialAdd.hidden && !socialAdd.contains(event.target) && !socialListAdd.contains(event.target)) {
       closeSocialAdd(false);
     }
     const insideDrillIn = activeSizeTrigger === socialItemSizeToggle && socialSize.contains(event.target);
@@ -1384,8 +1368,8 @@
       updateSocialListToggle(socialList.hidden ? (sel.dataset.context ?? demoContext) : socialListContext.value);
       if (!socialList.hidden) renderSocialList(!socialListBody.hidden);
       if (!socialAdd.hidden) {
-        if (socialAddTrigger.hidden) closeSocialAdd(false);
-        else positionConstructorPopup(socialAdd, socialAddTrigger);
+        if (socialListAdd.hidden) closeSocialAdd(false);
+        else positionConstructorPopup(socialAdd, socialListAdd);
       }
     } else {
       appearanceScenario = target.value;
