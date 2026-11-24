@@ -40,6 +40,7 @@
   const socialStyleBrandSwitch = $('socialStyleBrandSwitch');
   const socialStyleGroupedPresets = $('socialStyleGroupedPresets');
   const socialStyleColorModes = $('socialStyleColorModes');
+  const socialStyleContentModes = $('socialStyleContentModes');
   const socialButtonPresets = $('socialButtonPresets');
   const socialAdd = $('socialAdd');
   const constructor = $('app');
@@ -63,6 +64,10 @@
   const socialColorModeToggle = $('socialColorModeToggle');
   const socialItemColorModeToggle = $('socialItemColorModeToggle');
   const socialSettingsLayout = $('socialSettingsLayout');
+  const socialContentToggle = $('socialContentToggle');
+  const socialContentCaption = $('socialContentCaption');
+  const socialContentTumbler = $('socialContentTumbler');
+  const socialLayoutLabel = $('socialLayoutLabel');
   const socialWidgetDimensions = $('socialWidgetDimensions');
   const socialAppearanceCaption = socialColorModeToggle.querySelector('.btn__caption');
   const socialItemShapeToggle = $('socialItemShapeToggle');
@@ -76,7 +81,7 @@
   const socialListContextPicker = $('socialListContextPicker');
   const socialListClearContext = $('socialListClearContext');
   const socialListAdd = socialList.querySelector('.social-list__add');
-  const demoContext = 'Контрагент.Контакты';
+  const demoContext = 'Контрагент.Контакты.Соцсети';
   const socialSize = $('socialSize');
   const socialSizeHeaderSteps = $('socialSizeHeaderSteps');
   const itemSizeButtons = [...document.querySelectorAll('[data-social-size-step]')];
@@ -84,21 +89,15 @@
   const socialItemSizeToggle = $('socialItemSizeToggle');
   const socialSizeForm = $('socialSizeForm');
   const socialListBody = $('socialListBody');
-  const socialDetail = $('socialDetail');
-  const socialDetailName = $('socialDetailName');
-  const socialDetailLink = $('socialDetailLink');
-  const socialDetailTab = $('socialDetailTab');
-  const socialDetailPage = $('socialDetailPage');
   const socialListBack = socialList.querySelector('.pe__back');
   const socialListReset = socialList.querySelector('.pe__reset');
   const socialItems = sel.querySelector('.social-items');
+  let contextWidgetItems = [...socialItems.children];
   constructor.append(socialList, socialAdd, socialSize, socialColor);
   let listDraft = [];
   let removedItem = null;
   let draftRemovedItem = null;
   let savedWidgetItems = null;
-  let detailEntry = null;
-  let detailTrigger = null;
   let activeListTrigger = socialListToggle;
   let pinnedListPosition = null;
   let settingsTop = Infinity;
@@ -130,12 +129,16 @@
   let draftItemColor = itemColor;
   let itemColorMode = 'custom';
   let draftItemColorMode = itemColorMode;
-  let itemScenario = 'hide-with-context';
+  let itemScenario = 'always-visible';
   updateSocialListToggle(sel.dataset.context ?? demoContext);
-  let appearanceScenario = 'grouped';
+  let appearanceScenario;
 
   function hasAdvancedStyle() {
     return appearanceScenario === 'advanced' || appearanceScenario === 'advanced-v2';
+  }
+
+  function hasInlineDirection() {
+    return appearanceScenario === 'grouped' || appearanceScenario === 'advanced-v2';
   }
 
   function usesV2BrandBorder() {
@@ -191,7 +194,8 @@
   let displayedStyle = appliedStyle;
 
   function renderSocialStylePreviews(group, branded = false) {
-    const items = Array.from(socialItems.children).filter((item) => !item.hidden).slice(0, 3);
+    const content = hasInlineDirection() ? itemContent : 'icon';
+    const items = Array.from(socialItems.children).filter((item) => !item.hidden).slice(0, content === 'icon' ? 3 : 1);
     for (const option of group.querySelectorAll('.social-style__option')) {
       if (!items.length) {
         option.textContent = option.title;
@@ -199,11 +203,13 @@
       }
       const samples = items.map((item) => {
         const sample = document.createElement('span');
-        sample.classList.add('btn', 'btn--size-xl', 'btn--icon', 'social-style__sample', ...styleClasses(option));
+        sample.classList.add('btn', 'btn--size-xl', 'social-style__sample', ...styleClasses(option));
         if (branded) sample.classList.add('social-button--brand');
         sample.dataset.network = item.dataset.network;
+        sample.dataset.iconPosition = itemIconPosition;
         sample.setAttribute('aria-hidden', 'true');
-        sample.append(item.querySelector('.btn__icon').cloneNode(true));
+        sample.append(item.querySelector('.btn__icon').cloneNode(true), item.querySelector('.btn__caption').cloneNode(true));
+        renderItemContent(sample, content);
         return sample;
       });
       option.replaceChildren(...samples);
@@ -213,7 +219,7 @@
   function renderWidgetStyle(option) {
     const nextClasses = styleClasses(option);
     const previousClasses = styleClasses(displayedStyle);
-    const items = new Set([...socialItems.children, ...listDraft.map(({ button }) => button)]);
+    const items = new Set([...socialItems.children, ...contextWidgetItems, ...listDraft.map(({ button }) => button)]);
     if (removedItem) items.add(removedItem.entry.button);
     if (draftRemovedItem) items.add(draftRemovedItem.entry.button);
     for (const item of items) {
@@ -233,13 +239,13 @@
   }
 
   function showStyleMenu(group) {
-    for (const menu of [socialStylePreviews, socialStyleSwitchPresets, socialStyleGroupedPresets, socialStyleColorModes, socialButtonPresets]) {
+    for (const menu of [socialStylePreviews, socialStyleSwitchPresets, socialStyleGroupedPresets, socialStyleColorModes, socialStyleContentModes, socialButtonPresets]) {
       menu.hidden = menu !== group;
     }
     socialStyle.classList.toggle('social-style--networks', group === socialStylePreviews);
     socialStyle.classList.toggle('social-style--switch', group === socialStyleSwitchPresets);
     socialStyle.classList.toggle('social-style--grouped', group === socialStyleGroupedPresets);
-    socialStyle.classList.toggle('social-style--color-modes', group === socialStyleColorModes);
+    socialStyle.classList.toggle('social-style--color-modes', group.classList.contains('social-style__mode-menu'));
   }
 
   function matchStyleOption(group, style, brand = styleClasses(style).includes('social-button--brand')) {
@@ -276,7 +282,7 @@
       showStyleMenu(socialStyleSwitchPresets);
       renderSocialStylePreviews(socialStyleSwitchPresets, socialStyleBrandSwitch.checked);
       markSocialStyle(socialStyleSwitchPresets, matchStyleOption(socialStyleSwitchPresets, appliedStyle));
-    } else if (appearanceScenario === 'grouped') {
+    } else if (appearanceScenario === 'grouped' || appearanceScenario === 'grouped-v2') {
       showStyleMenu(socialStyleGroupedPresets);
       renderSocialStylePreviews(socialStyleGroupedPresets);
       markSocialStyle(socialStyleGroupedPresets, matchStyleOption(socialStyleGroupedPresets, appliedStyle, itemColorMode === 'brand'));
@@ -356,11 +362,14 @@
     popup.classList.remove('is-above');
     const panel = popup.getBoundingClientRect();
     if (activeStyleTrigger !== socialStyleToggle) {
-      if (activeStyleTrigger === socialItemColorModeToggle) {
+      if (activeStyleTrigger === socialItemColorModeToggle || activeStyleTrigger === socialContentToggle) {
         const anchor = activeStyleTrigger.querySelector('.btn__caption').getBoundingClientRect();
-        const firstLabel = socialStyleColorModes.querySelector('.social-style__mode-label').getBoundingClientRect();
-        const left = anchor.left - (firstLabel.left - panel.left);
-        const top = anchor.top + (anchor.height - firstLabel.height) / 2 - (firstLabel.top - panel.top);
+        const alignedLabel = activeStyleTrigger === socialContentToggle
+          ? selectedStyle().querySelector('.social-style__mode-label')
+          : socialStyleColorModes.querySelector('.social-style__mode-label');
+        const label = alignedLabel.getBoundingClientRect();
+        const left = anchor.left - (label.left - panel.left);
+        const top = anchor.top + (anchor.height - label.height) / 2 - (label.top - panel.top);
         popup.style.left = window.scrollX + Math.max(4, Math.min(left, window.innerWidth - panel.width - 4)) + 'px';
         popup.style.top = window.scrollY + Math.max(4, Math.min(top, window.innerHeight - panel.height - 4)) + 'px';
         return;
@@ -407,11 +416,6 @@
       const widget = sel.getBoundingClientRect();
       const left = pinnedListPosition?.left ?? widget.left - bounds.left - popup.offsetWidth - 6;
       const anchorTop = pinnedListPosition?.top ?? toolbar.top - bounds.top - 2;
-      if (trigger === socialListToggle) {
-        const top = Math.max(gap, anchorTop - 10);
-        const headerHeight = popup.querySelector('.pe__head').offsetHeight;
-        popup.style.setProperty('--social-list-body-height', Math.max(0, constructor.clientHeight - top - headerHeight - gap) + 'px');
-      }
       const top = Math.min(trigger === socialListToggle ? anchorTop - 10 : anchorTop, constructor.clientHeight - popup.offsetHeight - gap);
       if (trigger !== socialListToggle) settingsTop = Math.min(settingsTop, top);
       popup.style.left = Math.max(gap, left) + 'px';
@@ -865,28 +869,29 @@
     caption.hidden = true;
     caption.textContent = label;
     button.append(icon, caption);
+    renderItemContent(button, currentItemContent());
     applyItemPresentation(button);
-    const bound = Boolean(socialListContext.value);
     const entry = { button, value: '', hidden: false, manual: true };
     listDraft.push(entry);
     renderSocialList();
-    closeSocialAdd(!bound);
-    if (bound) {
-      const row = socialListRows.lastElementChild;
-      openSocialDetail(entry, row.querySelector('img'), row.querySelector('.social-list__open'));
-    }
+    closeSocialAdd(false);
+    socialListRows.lastElementChild.querySelector('.social-list__link').click();
   });
 
   function resetSocialList() {
     restoreWidgetItems();
     draftRemovedItem = removedItem;
-    listDraft = Array.from(socialItems.children, (button) => ({
+    listDraft = readListEntries(socialItems.children);
+    socialListContext.value = sel.dataset.context ?? demoContext;
+    setSocialListContext(socialListContext.value, true);
+  }
+
+  function readListEntries(buttons) {
+    return Array.from(buttons, (button) => ({
       button, value: button.dataset.link || '', hidden: button.hidden,
       newTab: button.dataset.newTab === 'true',
       name: button.dataset.name, manual: button.dataset.manual === 'true',
     }));
-    socialListContext.value = sel.dataset.context ?? demoContext;
-    setSocialListContext(sel.dataset.context ?? demoContext, true);
   }
 
   function restoreWidgetItems() {
@@ -934,17 +939,21 @@
     socialListClearContext.hidden = !bound;
     if (hadContext && !bound) {
       const manualNetworks = new Set(['vkontakte', 'max', 'ok']);
-      listDraft = listDraft.filter((entry) => manualNetworks.has(entry.button.dataset.network));
+      listDraft = listDraft
+        .filter((entry) => manualNetworks.has(entry.button.dataset.network))
+        .map((entry) => ({ ...entry, button: entry.button.cloneNode(true) }));
       draftRemovedItem = null;
     }
-    if (!hadContext && bound && savedWidgetItems) {
-      listDraft = savedWidgetItems.map((button) => ({
-        button, value: button.dataset.link || '', hidden: button.hidden,
-        newTab: button.dataset.newTab === 'true',
-        name: button.dataset.name, manual: button.dataset.manual === 'true',
-      }));
-      draftRemovedItem = removedItem;
-      restoreWidgetItems();
+    if (!hadContext && bound) {
+      listDraft = readListEntries(contextWidgetItems);
+      draftRemovedItem = null;
+      socialItems.replaceChildren(...contextWidgetItems);
+      const content = currentItemContent();
+      for (const button of contextWidgetItems) {
+        applyItemPresentation(button);
+        renderItemContent(button, content);
+      }
+      updateWidgetDimensions();
     }
     updateSocialListToggle(value);
     renderSocialList(reposition);
@@ -976,9 +985,11 @@
     const bound = Boolean(socialListContext.value);
     if (!bound) {
       socialItems.replaceChildren(...listDraft.map((entry) => entry.button));
+      const content = currentItemContent();
       for (const entry of listDraft) {
         entry.button.hidden = entry.hidden;
         applyItemPresentation(entry.button);
+        renderItemContent(entry.button, content);
       }
     }
     const allowContextAdd = bound && itemScenario === 'always-add';
@@ -1002,39 +1013,34 @@
       const iconSlot = document.createElement('span');
       iconSlot.className = 'social-list__icon';
       iconSlot.append(icon);
-      const name = document.createElement('span');
-      name.className = 'social-list__name';
-      name.textContent = label;
-      const link = document.createElement('span');
+      const link = document.createElement(readonly ? 'span' : 'button');
       link.className = 'social-list__link';
       link.textContent = entry.value;
-      const open = document.createElement(readonly ? 'div' : 'button');
-      open.className = 'social-list__open';
-      open.append(iconSlot, name, link);
-      row.append(open);
+      link.title = entry.value;
+      row.append(iconSlot, link);
       socialListRows.append(row);
       if (readonly) return;
-      open.type = 'button';
-      open.draggable = !bound;
-      if (!bound) open.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown');
-      open.addEventListener('keydown', (event) => {
+      link.type = 'button';
+      link.draggable = !bound;
+      if (!bound) link.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown');
+      link.addEventListener('keydown', (event) => {
         if (bound) return;
         if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
         event.preventDefault();
         const index = listDraft.indexOf(entry) + (event.key === 'ArrowUp' ? -1 : 1);
         if (index >= 0 && index < listDraft.length) {
           moveListEntry(entry, index);
-          open.focus({ preventScroll: true });
+          link.focus({ preventScroll: true });
         }
       });
-      open.addEventListener('dragstart', ({ dataTransfer }) => {
+      link.addEventListener('dragstart', ({ dataTransfer }) => {
         if (bound) return;
         draggedListEntry = entry;
         dataTransfer.effectAllowed = 'move';
         dataTransfer.setData('application/x-social-list-item', String(listDraft.indexOf(entry)));
         dataTransfer.setDragImage(row, 12, row.offsetHeight / 2);
       });
-      open.addEventListener('dragend', () => { draggedListEntry = null; });
+      link.addEventListener('dragend', () => { draggedListEntry = null; });
       row.addEventListener('dragover', (event) => {
         if (!draggedListEntry) return;
         event.preventDefault();
@@ -1051,24 +1057,100 @@
         event.preventDefault();
         draggedListEntry = null;
       });
-      open.addEventListener('click', () => openSocialDetail(entry, icon, open));
-      const actions = document.createElement('div');
-      actions.className = 'social-list__actions';
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.textContent = '\uE65C';
-      remove.setAttribute('aria-label', 'Удалить · ' + label);
-      remove.disabled = Boolean(draftRemovedItem);
-      remove.addEventListener('click', () => removeListItem(entry));
-      const more = document.createElement('button');
-      more.type = 'button';
-      more.textContent = '\uE9D9';
-      more.setAttribute('aria-label', 'Настройки · ' + label);
-      more.addEventListener('click', () => openSocialDetail(entry, icon, open));
-      actions.append(remove, more);
-      row.append(actions);
+      setupListLinkEditor(row, link, entry, label);
     });
     if (reposition) positionConstructorPopup(socialList, activeListTrigger);
+  }
+
+  function setupListLinkEditor(row, link, entry, label) {
+    const input = document.createElement('input');
+    input.className = 'social-list__input';
+    input.type = 'text';
+    input.inputMode = 'url';
+    input.placeholder = 'https://';
+    input.spellcheck = false;
+    input.setAttribute('aria-label', 'Ссылка · ' + label);
+    input.hidden = true;
+
+    const actions = document.createElement('div');
+    actions.className = 'social-list__actions';
+    const open = document.createElement('a');
+    open.textContent = '\uE63C';
+    open.setAttribute('aria-label', 'Открыть ссылку · ' + label);
+    open.target = '_blank';
+    open.rel = 'noopener noreferrer';
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'social-list__remove';
+    remove.textContent = '\uE65C';
+    remove.setAttribute('aria-label', 'Удалить · ' + label);
+    remove.disabled = Boolean(draftRemovedItem);
+    remove.addEventListener('click', () => removeListItem(entry));
+    actions.append(open, remove);
+
+    const editActions = document.createElement('div');
+    editActions.className = 'social-list__actions social-list__actions--edit';
+    editActions.hidden = true;
+    const done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'pe__done pe__done--m';
+    done.textContent = '\uE75E';
+    done.setAttribute('aria-label', 'Сохранить ссылку · ' + label);
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = '\uE66C';
+    cancel.setAttribute('aria-label', 'Отменить редактирование · ' + label);
+    editActions.append(done, cancel);
+    row.append(input, actions, editActions);
+
+    let originalValue;
+    function updateLink() {
+      link.textContent = entry.value || 'https://';
+      link.title = entry.value;
+      link.setAttribute('aria-label', ['Изменить ссылку', label, entry.value].filter(Boolean).join(' · '));
+      link.classList.toggle('is-empty', !entry.value);
+      const url = URL.canParse(entry.value) ? new URL(entry.value) : null;
+      if (url && ['https:', 'http:'].includes(url.protocol)) {
+        open.href = url.href;
+        open.removeAttribute('aria-disabled');
+      } else {
+        open.removeAttribute('href');
+        open.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    function finishEdit(save, restoreFocus) {
+      if (input.hidden) return;
+      entry.value = save ? input.value.trim() : originalValue;
+      updateLink();
+      input.hidden = editActions.hidden = true;
+      link.hidden = actions.hidden = false;
+      if (restoreFocus) link.focus({ preventScroll: true });
+    }
+
+    updateLink();
+    link.addEventListener('click', () => {
+      originalValue = entry.value;
+      input.value = entry.value;
+      link.hidden = actions.hidden = true;
+      input.hidden = editActions.hidden = false;
+      input.focus({ preventScroll: true });
+    });
+    input.addEventListener('input', () => { entry.value = input.value; });
+    done.addEventListener('click', () => finishEdit(true, true));
+    cancel.addEventListener('click', () => finishEdit(false, true));
+    row.addEventListener('focusout', (event) => {
+      if (!row.contains(event.relatedTarget)) finishEdit(true, false);
+    });
+    row.addEventListener('keydown', (event) => {
+      if (input.hidden) return;
+      if (event.key === 'Escape' || (event.key === 'Enter' && event.target === input)) {
+        event.preventDefault();
+        event.stopPropagation();
+        finishEdit(event.key === 'Enter', true);
+      }
+    });
   }
 
   function moveListEntry(entry, index) {
@@ -1086,27 +1168,9 @@
     socialItems.replaceChildren(...listDraft.map((item) => item.button));
   }
 
-  function resetSocialDetail() {
-    socialDetailName.value = detailEntry.name ?? detailEntry.button.getAttribute('aria-label');
-    socialDetailLink.value = detailEntry.value;
-    if (detailEntry.newTab) socialDetailTab.checked = true;
-    else socialDetailPage.checked = true;
-  }
-
-  function openSocialDetail(entry, icon, trigger) {
-    detailEntry = entry;
-    detailTrigger = trigger;
-    $('socialDetailIcon').replaceChildren(icon.cloneNode());
-    resetSocialDetail();
-    $('socialListTitle').textContent = 'Соцсеть';
-    socialListBody.hidden = true;
-    socialListBack.hidden = false;
-    socialDetail.hidden = false;
-    socialDetailLink.focus({ preventScroll: true });
-  }
-
   function generalSettingsTitle() {
-    return activeListTrigger === socialStyleToggle ? 'Стиль' : 'Соцсети';
+    if (activeListTrigger !== socialStyleToggle) return 'Соцсети';
+    return appearanceScenario === 'advanced-v2' ? 'Оформление' : 'Стиль';
   }
 
   function renderShapeFields() {
@@ -1225,7 +1289,7 @@
     socialListBody.hidden = true;
     socialShapeSettings.hidden = false;
     socialListBack.hidden = false;
-    $('socialListTitle').textContent = 'Форма';
+    $('socialListTitle').textContent = 'Стиль';
     setPopupTrigger(socialItemShapeToggle, true);
     positionConstructorPopup(socialList, activeListTrigger);
     socialListBack.focus({ preventScroll: true });
@@ -1340,7 +1404,7 @@
     socialWidgetDimensions.before(socialSettingsLayout);
     socialAppearanceToggle.hidden = false;
     for (const control of socialSettingsLayout.querySelectorAll('.social-settings__direction')) {
-      control.hidden = appearanceScenario !== 'advanced-v2' || control.matches('.pe__label');
+      control.hidden = !hasInlineDirection() || control.matches('.pe__label');
     }
     socialAppearance.hidden = true;
     socialListBack.hidden = true;
@@ -1351,27 +1415,6 @@
     if (restoreFocus) socialAppearanceToggle.focus({ preventScroll: true });
   }
 
-  function closeSocialDetail(restoreFocus) {
-    if (!detailEntry) return;
-    const rowIndex = listDraft.indexOf(detailEntry);
-    detailEntry.name = socialDetailName.value.trim();
-    detailEntry.value = socialDetailLink.value.trim();
-    detailEntry.newTab = socialDetailTab.checked;
-    detailEntry = null;
-    $('socialListTitle').textContent = activeListTrigger === socialGeneralToggle ? 'Соцсети' : 'Список';
-    socialDetail.hidden = true;
-    socialListBack.hidden = true;
-    socialListBody.hidden = false;
-    renderSocialList(false);
-    if (restoreFocus) {
-      const rowTrigger = detailTrigger.isConnected ? detailTrigger
-        : socialListRows.children[rowIndex]?.querySelector('button.social-list__open');
-      const trigger = rowTrigger && !socialListManual.hidden ? rowTrigger : socialList.querySelector('.pe__close');
-      trigger.focus({ preventScroll: true });
-    }
-    detailTrigger = null;
-  }
-
   function closeSocialList(restoreFocus) {
     if (socialList.hidden) return;
     closeSocialAdd(false);
@@ -1380,7 +1423,6 @@
     closeSocialShape(false);
     if (activeStyleTrigger !== socialStyleToggle) closeSocialStyle(false);
     if (sizeDrilledIn()) closeSocialSize(false);
-    closeSocialDetail(false);
     saveSocialList();
     savedWidgetItems = null;
     renderItemColor(itemColor);
@@ -1393,10 +1435,8 @@
       renderWidgetStyle(appliedStyle);
     }
     socialList.hidden = true;
-    socialList.classList.remove('is-keyboard-navigation');
     pinnedListPosition = null;
     settingsTop = Infinity;
-    socialList.style.removeProperty('--social-list-body-height');
     draggedListEntry = null;
     updateSocialListToggle(sel.dataset.context ?? demoContext);
     setPopupTrigger(activeListTrigger, false);
@@ -1407,6 +1447,19 @@
   let itemDirection = 'row';
   let itemIconPosition = 'left';
 
+  function currentItemContent() {
+    return socialSettingsLayout.querySelector('[name="socialContent"]:checked').value;
+  }
+
+  function contentModeOption(value) {
+    return socialStyleContentModes.querySelector(`[data-content-mode="${value}"]`);
+  }
+
+  function selectItemContent(value) {
+    socialSettingsLayout.querySelector(`[name="socialContent"][value="${value}"]`).checked = true;
+    socialContentCaption.textContent = contentModeOption(value).textContent;
+  }
+
   function applyWidgetContent(content, direction, iconPosition = itemIconPosition) {
     socialItems.dataset.direction = direction;
     socialItems.dataset.iconPosition = iconPosition;
@@ -1416,6 +1469,7 @@
 
   function renderItemContent(item, content) {
     item.classList.toggle('btn--icon', content === 'icon');
+    item.querySelector('.btn__icon').hidden = content === 'name';
     item.querySelector('.btn__caption').hidden = content === 'icon';
   }
 
@@ -1445,7 +1499,7 @@
   }
 
   function updateSocialStylePreview() {
-    const content = socialSettingsLayout.querySelector('[name="socialContent"]:checked').value;
+    const content = currentItemContent();
     const position = socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value;
     socialItemStyle.dataset.iconPosition = position;
     socialButtonPresets.dataset.iconPosition = position;
@@ -1458,7 +1512,7 @@
     draftItemLayouts = new Map(itemLayouts);
     draftItemShapes = new Map(itemShapes);
     draftItemSize = itemSize;
-    socialSettingsLayout.querySelector(`[name="socialContent"][value="${itemContent}"]`).checked = true;
+    selectItemContent(itemContent);
     socialSettingsLayout.querySelector(`[name="socialDirection"][value="${itemDirection}"]`).checked = true;
     socialSettingsLayout.querySelector(`[name="socialIconPosition"][value="${itemIconPosition}"]`).checked = true;
     applyWidgetContent(itemContent, itemDirection);
@@ -1477,7 +1531,7 @@
     itemColor = draftItemColor;
     itemColorMode = draftItemColorMode;
     itemSize = draftItemSize;
-    itemContent = socialSettingsLayout.querySelector('[name="socialContent"]:checked').value;
+    itemContent = currentItemContent();
     itemDirection = socialSettingsLayout.querySelector('[name="socialDirection"]:checked').value;
     itemIconPosition = socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value;
     for (const [key, layout] of draftItemLayouts) itemLayouts.set(key, layout);
@@ -1485,13 +1539,14 @@
     selectSocialStyle(draftStyle);
   }
 
-  socialSettingsLayout.addEventListener('change', () => {
+  function previewSocialContent() {
     updateSocialStylePreview();
-    applyWidgetContent(socialSettingsLayout.querySelector('[name="socialContent"]:checked').value,
+    applyWidgetContent(currentItemContent(),
       socialSettingsLayout.querySelector('[name="socialDirection"]:checked').value,
       socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value);
     positionConstructorPopup(socialList, activeListTrigger);
-  });
+  }
+  socialSettingsLayout.addEventListener('change', previewSocialContent);
   for (const button of itemSizeButtons) {
     button.addEventListener('click', () => {
       const index = itemSizes.indexOf(draftItemSize) + Number(button.dataset.socialSizeStep);
@@ -1523,8 +1578,9 @@
     activeListTrigger = trigger;
     pinnedListPosition = position;
     const general = trigger !== socialListToggle;
+    socialList.classList.toggle('social-list--networks', !general);
     socialList.classList.toggle('social-list--style-only', trigger === socialStyleToggle);
-    $('socialListTitle').textContent = general ? generalSettingsTitle() : 'Список';
+    $('socialListTitle').textContent = general ? generalSettingsTitle() : 'Соцсети';
     socialGeneralFields.hidden = !general;
     if (general) resetSocialGeneral();
     socialList.hidden = false;
@@ -1540,7 +1596,6 @@
   socialItemShapeToggle.addEventListener('click', openSocialShape);
   socialListBack.addEventListener('click', () => {
     if (!socialShapeSettings.hidden) closeSocialShape(true);
-    else if (socialAppearance.hidden) closeSocialDetail(true);
     else closeSocialAppearance(true);
   });
   socialListReset.addEventListener('click', () => {
@@ -1549,8 +1604,7 @@
       draftItemShapes.set(itemLayoutKey(draftStyle), shapeEntry);
       renderShapeFields();
       renderWidgetStyle(draftStyle);
-    } else if (detailEntry) resetSocialDetail();
-    else {
+    } else {
       if (activeListTrigger !== socialListToggle) resetSocialGeneral();
       resetSocialList();
     }
@@ -1563,10 +1617,6 @@
     }
     if (!socialAppearance.hidden) {
       closeSocialAppearance(true);
-      return;
-    }
-    if (detailEntry) {
-      closeSocialDetail(true);
       return;
     }
     const styleOnly = activeListTrigger === socialStyleToggle;
@@ -1592,6 +1642,7 @@
       applyItemPresentation(button);
       return button;
     }));
+    if (socialListContext.value) contextWidgetItems = [...socialItems.children];
     removedItem = draftRemovedItem;
     savedWidgetItems = null;
     if (activeListTrigger !== socialListToggle) saveSocialGeneral();
@@ -1627,6 +1678,7 @@
   });
   socialColorModeToggle.addEventListener('click', toggleSocialStyle);
   socialItemColorModeToggle.addEventListener('click', toggleSocialStyle);
+  socialContentToggle.addEventListener('click', toggleSocialStyle);
   socialItemStyle.addEventListener('click', toggleSocialStyle);
 
   function openSocialStyle(trigger) {
@@ -1637,7 +1689,10 @@
     if (trigger !== socialStyleToggle) {
       socialStyle.classList.add('social-style--settings');
       document.body.append(socialStyle);
-      if (trigger === socialItemColorModeToggle) {
+      if (trigger === socialContentToggle) {
+        showStyleMenu(socialStyleContentModes);
+        markSocialStyle(socialStyleContentModes, contentModeOption(currentItemContent()));
+      } else if (trigger === socialItemColorModeToggle) {
         showStyleMenu(socialStyleColorModes);
         const selected = socialStyleColorModes.querySelector(`[data-color-mode="${draftItemColorMode}"]`);
         markSocialStyle(socialStyleColorModes, selected);
@@ -1666,6 +1721,12 @@
   socialStyle.addEventListener('click', (event) => {
     const option = event.target.closest('.social-style__option');
     if (!option) return;
+    if (activeStyleTrigger === socialContentToggle) {
+      selectItemContent(option.dataset.contentMode);
+      closeSocialStyle(true);
+      previewSocialContent();
+      return;
+    }
     if (activeStyleTrigger !== socialStyleToggle) {
       if (activeStyleTrigger === socialColorModeToggle || activeStyleTrigger === socialItemColorModeToggle) {
         draftItemColorMode = option.dataset.colorMode
@@ -1682,7 +1743,6 @@
 
   document.addEventListener('pointerdown', (event) => {
     if (event.target.closest('.social-scenarios')) return;
-    socialList.classList.remove('is-keyboard-navigation');
     const insideColor = !socialColor.hidden && socialColor.contains(event.target);
     if (!insideColor && !activeColorTrigger.contains(event.target)) closeSocialColor();
     const insideStyle = !socialStyle.hidden && socialStyle.contains(event.target);
@@ -1702,7 +1762,6 @@
     }
   });
   document.addEventListener('keydown', (event) => {
-    if (!socialList.hidden && event.key === 'Tab') socialList.classList.add('is-keyboard-navigation');
     if (event.key !== 'Escape') return;
     if (socialColor.hidden && socialStyle.hidden && socialAdd.hidden && socialList.hidden && socialSize.hidden) return;
     event.preventDefault();
@@ -1710,7 +1769,6 @@
     else if (!socialSize.hidden) closeSocialSize(true);
     else if (!socialStyle.hidden) closeSocialStyle(true);
     else if (!socialAdd.hidden) closeSocialAdd(true);
-    else if (detailEntry) closeSocialDetail(true);
     else if (!socialAppearance.hidden) closeSocialAppearance(true);
     else if (!socialShapeSettings.hidden) closeSocialShape(true);
     else closeSocialList(true);
@@ -1801,6 +1859,39 @@
   const scenarioPanelTop = frame.panel.querySelector('.df-panel__top');
   scenarioPanelTop.append(scenarios.querySelector('#socialScenarioGroups'));
   scenarioPanelTop.after(scenarios);
+
+  function setAppearanceScenario(scenario) {
+    if (!socialAppearance.hidden) closeSocialAppearance(false);
+    appearanceScenario = scenario;
+    if (activeListTrigger === socialStyleToggle && !socialList.hidden) closeSocialList(false);
+    if (hasAdvancedStyle() || activeStyleTrigger !== socialStyleToggle) closeSocialStyle(false);
+    socialStyleToggle.setAttribute('aria-controls', hasAdvancedStyle() ? 'socialList' : 'socialStyle');
+    socialList.dataset.appearanceScenario = scenario;
+    const inlineDirection = hasInlineDirection();
+    socialContentToggle.hidden = !inlineDirection;
+    socialContentTumbler.hidden = inlineDirection;
+    socialList.classList.toggle('social-list--inline-direction', inlineDirection);
+    socialLayoutLabel.textContent = inlineDirection ? 'Направление' : 'Оформление';
+    socialSettingsLayout.querySelector('.tumbler.social-settings__direction').hidden = !inlineDirection;
+    if (!inlineDirection && itemContent === 'name') itemContent = 'caption';
+    if (!inlineDirection && currentItemContent() === 'name') {
+      selectItemContent('caption');
+      if (draftItemLayouts) previewSocialContent();
+      else applyWidgetContent(itemContent, itemDirection);
+    }
+    renderWidgetStyle(displayedStyle);
+    if (!socialList.hidden) {
+      if (draftItemLayouts) updateColorModeControls();
+      if (!socialShapeSettings.hidden) renderShapeFields();
+      positionConstructorPopup(socialList, activeListTrigger);
+    }
+    if (!socialStyle.hidden && activeStyleTrigger === socialStyleToggle) {
+      renderToolbarStyleMenu();
+      positionSocialStyle();
+    }
+  }
+
+  setAppearanceScenario(frame.panel.querySelector('[name="socialAppearanceScenario"]:checked').value);
   frame.panel.addEventListener('change', ({ target }) => {
     if (target.name === 'socialItemScenario') {
       itemScenario = target.value;
@@ -1811,23 +1902,7 @@
         else positionConstructorPopup(socialAdd, socialListAdd);
       }
     } else if (target.name === 'socialAppearanceScenario') {
-      if (!socialAppearance.hidden) closeSocialAppearance(false);
-      appearanceScenario = target.value;
-      if (activeListTrigger === socialStyleToggle && !socialList.hidden) closeSocialList(false);
-      if (hasAdvancedStyle() || activeStyleTrigger !== socialStyleToggle) closeSocialStyle(false);
-      socialStyleToggle.setAttribute('aria-controls', hasAdvancedStyle() ? 'socialList' : 'socialStyle');
-      socialList.dataset.appearanceScenario = appearanceScenario;
-      socialSettingsLayout.querySelector('.tumbler.social-settings__direction').hidden = appearanceScenario !== 'advanced-v2';
-      renderWidgetStyle(displayedStyle);
-      if (!socialList.hidden) {
-        if (draftItemLayouts) updateColorModeControls();
-        if (!socialShapeSettings.hidden) renderShapeFields();
-        positionConstructorPopup(socialList, activeListTrigger);
-      }
-      if (!socialStyle.hidden && activeStyleTrigger === socialStyleToggle) {
-        renderToolbarStyleMenu();
-        positionSocialStyle();
-      }
+      setAppearanceScenario(target.value);
     }
   });
 })();
