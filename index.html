@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
-<link rel="stylesheet" href="styles.css?v=85">
+<link rel="stylesheet" href="styles.css?v=87">
 </head>
 <body>
 <div id="stage" class="stage">
@@ -338,8 +338,8 @@
                                 <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font" id="socialItemColorModeToggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle"><span class="btn__caption">Свой</span></button>
                                 <button type="button" class="social-settings__color" id="socialColorToggle" aria-label="Выбрать цвет" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"></button>
                               </div>
-                              <span class="pe__label">Шрифт</span>
-                              <div>
+                              <span class="pe__label" data-requires-content="text">Шрифт</span>
+                              <div data-requires-content="text">
                                 <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font">
                                   <span class="btn__caption">Основной текст</span>
                                 </button>
@@ -425,7 +425,7 @@
                             <div class="social-appearance__row"><span class="pe__label">Фон</span><button type="button" class="social-shape__swatch" data-shape-picker="background" aria-label="Цвет фона" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"><span class="pe__swatch social-shape__color" aria-hidden="true"></span><span class="social-shape__hex" hidden></span></button><button type="button" class="pe__x social-shape__clear" data-clear="background" aria-label="Сбросить: Цвет фона">&#xE66C;</button></div>
                             <div class="social-appearance__row"><span class="pe__label">Тень</span><button type="button" class="social-shape__swatch" data-shape-picker="shadow" aria-label="Цвет тени" disabled><span class="pe__swatch social-shape__color" aria-hidden="true"></span></button><button type="button" class="pe__x social-shape__clear" data-clear="shadow" aria-label="Сбросить: Цвет тени">&#xE66C;</button></div>
                           </div>
-                            <div class="pe__card social-appearance__card">
+                          <div class="pe__card social-appearance__card" data-requires-content="text">
                             <div class="social-appearance__row"><strong>Шрифт</strong><span class="social-shape__font-label">Основной текст</span></div>
                             <div class="social-appearance__row social-shape__font-row">
                               <label class="social-shape__font-select">
@@ -443,10 +443,10 @@
                               <label><input type="checkbox" name="strike" aria-label="Зачёркнутый"><img src="assets/social-settings/shape-strike.svg" alt="" width="28" height="28"></label>
                             </div>
                           </div>
-                            <div class="pe__card social-appearance__card">
+                          <div class="pe__card social-appearance__card" data-requires-content="text">
                             <div class="social-appearance__row"><span class="pe__label">Текст</span><button type="button" class="social-shape__swatch" data-shape-picker="text" aria-label="Цвет текста" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"><span class="pe__swatch social-shape__color" aria-hidden="true"></span></button></div>
                           </div>
-                            <div class="pe__card social-appearance__card">
+                          <div class="pe__card social-appearance__card" data-requires-content="icon">
                             <div class="social-appearance__row"><strong>Иконка</strong><button type="button" class="social-shape__swatch" data-shape-picker="icon" aria-label="Цвет иконки" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialColor"><span class="pe__swatch social-shape__color" aria-hidden="true"></span></button><label class="pe__num"><input class="pe__num-value" type="number" min="1" step="1" name="iconSize" aria-label="Размер иконки, пиксели"></label><span class="pe__label social-shape__gap">Отступ</span><label class="pe__num"><input class="pe__num-value" type="number" min="0" step="1" name="gap" aria-label="Отступ иконки, пиксели"></label></div>
                           </div>
                           </form>

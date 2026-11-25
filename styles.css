@@ -395,6 +395,10 @@ body.is-resizing{cursor:ew-resize;user-select:none}
 .social-list--inline-direction .social-settings__layout { grid-template-columns: max-content minmax(0, 1fr); }
 .social-list--inline-direction :is(#socialSettingsLayout > .social-settings__style, #socialAppearanceToggle),
 .social-list[data-appearance-scenario="advanced-v2"].social-list--style-only #socialWidgetDimensions { display: none; }
+.social-list--inline-direction:has([name="socialContent"][value="icon"]:checked) [data-requires-content="text"],
+.social-list--inline-direction:has([name="socialContent"][value="name"]:checked) [data-requires-content="icon"] {
+  display: none;
+}
 :is(.social-items, #socialButtonPresets, #socialItemStyle, .social-style__sample)[data-icon-position="right"] .btn__icon {
   order: 1;
 }
@@ -869,6 +873,7 @@ button.social-settings__arrow:active { background: var(--background-contrast-pal
   border-radius: var(--components-popup-menu-item_border-radius, 16px);
   font-size: var(--font-font-size-font-size_xl); text-align: left;
 }
+#socialStyleContentModes [data-content-mode="caption"] { padding-inline-end: 16px; }
 .social-style__mode-menu .social-style__option::before {
   content: ""; position: static; flex: none; width: 12px; height: 12px;
   background: url("assets/social-settings/color-mode-unselected.svg") center no-repeat;
