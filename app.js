@@ -2292,6 +2292,7 @@
     updateNetworkGradient();
     const inlineDirection = hasInlineDirection();
     const widgetAppearance = hasWidgetAppearance();
+    directionControls[0].textContent = widgetAppearance ? 'Направление' : 'Расположение';
     const hasContentMenu = inlineDirection || widgetAppearance;
     socialContentControls.hidden = !hasContentMenu;
     socialContentTumbler.hidden = hasContentMenu;
