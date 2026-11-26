@@ -210,19 +210,19 @@ body.is-resizing{cursor:ew-resize;user-select:none}
 #socialItemStyle[data-color-mode="brand"], #socialButtonPresets[data-color-mode="brand"] {
   --social-form-color: var(--page-accent);
 }
-.social-button--brand[data-network="vkontakte"] { --social-brand-color: #07f; }
-.social-button--brand[data-network="telegram"] { --social-brand-color: #229ed9; }
-.social-button--brand[data-network="ok"] { --social-brand-color: #f70; }
-.social-button--brand[data-network="youtube"] { --social-brand-color: #f03; }
-.social-button--brand[data-network="zen"] { --social-brand-color: #1a1a1a; }
-.social-button--brand[data-network="max"] { --social-brand-color: #471aff; }
-.social-button--brand[data-network="whatsapp"] { --social-brand-color: #25d366; }
-.social-button--brand[data-network="rutube"] { --social-brand-color: #100943; }
-.social-button--brand[data-network="pinterest"] { --social-brand-color: #e60023; }
-.social-button--brand[data-network="viber"] { --social-brand-color: #7360f2; }
-.social-button--brand[data-network="facebook"] { --social-brand-color: #0866ff; }
-.social-button--brand[data-network="instagram"] { --social-brand-color: #e1306c; }
-.social-button--brand[data-network="tiktok"] { --social-brand-color: #000; }
+[data-network="vkontakte"] { --network-color: #07f; }
+[data-network="telegram"] { --network-color: #229ed9; }
+[data-network="ok"] { --network-color: #f70; }
+[data-network="youtube"] { --network-color: #f03; }
+[data-network="zen"] { --network-color: #1a1a1a; }
+[data-network="max"] { --network-color: #471aff; }
+[data-network="whatsapp"] { --network-color: #25d366; }
+[data-network="rutube"] { --network-color: #100943; }
+[data-network="pinterest"] { --network-color: #e60023; }
+[data-network="viber"] { --network-color: #7360f2; }
+[data-network="facebook"] { --network-color: #0866ff; }
+[data-network="instagram"] { --network-color: #e1306c; }
+[data-network="tiktok"] { --network-color: #000; }
 .social-items.wg__content { flex-flow: row wrap; gap: 14px; overflow: visible; }
 .social-items[data-direction="column"] { flex-flow: column nowrap; align-items: flex-start; }
 .social-item:not(:has(> .btn__caption:not([hidden]))) { width: var(--btn-h); padding: 0; }
@@ -838,6 +838,9 @@ button.social-settings__arrow:active { background: var(--background-contrast-pal
   color: var(--icon-unaccented_icon-color);
   font: var(--icon-icon_size-icon-size_s)/1 var(--icon-font-family-s_icon_font-family);
 }
+#socialColor[data-brand="true"] :is(.social-color__format, .social-color__format span, #socialColorHex) {
+  color: var(--text-readonly_text-color);
+}
 .social-color__values > .pe__num-value { flex: none; width: 66px; }
 .social-color__opacity .pe__num-value {
   flex: none;
@@ -1122,3 +1125,13 @@ button.social-settings__arrow:active { background: var(--background-contrast-pal
   border-radius: 50%;
   background: var(--extra-marker_color);
 }
+
+.social-button--brand { --social-brand-color: var(--network-color); }
+.has-brand-picker .social-button--brand {
+  --social-brand-color: color-mix(in srgb, var(--network-color, var(--page-accent)) var(--brand-opacity, 100%), transparent);
+}
+.has-brand-picker #socialItemColorModeToggle, #socialColorBrand[hidden] { display: none; }
+.social-color__links:has(#socialColorBrand:not([hidden])) { display: flex; justify-content: flex-start; gap: 12px; }
+.has-brand-picker:has(#socialSlot[data-color-mode="brand"]) :is(.tb__sw, #socialColorToggle),
+.has-brand-picker #socialColor[data-brand="true"] .social-color__current { background: var(--network-gradient); }
+.has-brand-picker #socialColor[data-brand='true'] .social-color__current { opacity: var(--preview-opacity, 1); }

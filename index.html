@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
-<link rel="stylesheet" href="styles.css?v=99">
+<link rel="stylesheet" href="styles.css?v=101">
 </head>
 <body>
 <div id="stage" class="stage">
@@ -494,6 +494,7 @@
                               <button type="button" class="btn btn--link btn--style-secondary btn--size-m" id="socialColorOther">
                                 <span class="btn__caption">Другой цвет</span>
                               </button>
+                              <button type="button" class="btn btn--link btn--style-secondary btn--size-m" id="socialColorBrand" hidden><span class="btn__caption">Брендированный</span></button>
                             </div>
                             <input class="pe__pop-native" name="nativeColor" type="color" tabindex="-1" aria-hidden="true">
                           </div>
@@ -647,6 +648,7 @@
       <div class="df-options" role="radiogroup" aria-labelledby="socialAppearanceScenariosTitle">
         <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="in-place" checked><span>Настройка по месту</span></label>
         <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="appearance-window"><span>Общее окно оформления</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="brand-picker"><span>Переключатель Брендированный в окне выбора цвета</span></label>
       </div>
     </section>
   </div>
@@ -665,6 +667,6 @@
 <script src="vendor/ui-kit/components/demo-frame/demo-frame.js"></script>
 <script src="vendor/ui-kit/components/builder-header/builder-header.js?v=3"></script>
 <script src="vendor/ui-kit/components/left-sidebar/left-sidebar.js"></script>
-<script src="app.js?v=87"></script>
+<script src="app.js?v=89"></script>
 </body>
 </html>

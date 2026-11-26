@@ -153,12 +153,16 @@
   updateSocialListToggle(sel.dataset.context ?? demoContext);
   let appearanceScenario;
 
+  function hasCommonAppearanceWindow() {
+    return appearanceScenario === 'appearance-window' || appearanceScenario === 'brand-picker';
+  }
+
   function hasAdvancedStyle() {
     return appearanceScenario === 'advanced' || appearanceScenario === 'advanced-v2' || hasWidgetAppearance();
   }
 
   function hasWidgetAppearance() {
-    return appearanceScenario === 'in-place' || appearanceScenario === 'appearance-window';
+    return appearanceScenario === 'in-place' || hasCommonAppearanceWindow();
   }
 
   function editingWidgetAppearance() {
@@ -262,7 +266,7 @@
       applyItemPresentation(item, option);
     }
     displayedStyle = option;
-    socialToolbarColorToggle.hidden = sel.dataset.colorMode === 'brand';
+    socialToolbarColorToggle.hidden = sel.dataset.colorMode === 'brand' && appearanceScenario !== 'brand-picker';
     updateWidgetDimensions();
     positionItemToolbar();
   }
@@ -763,7 +767,21 @@
     element.style.setProperty('--social-color-preview', socialColorValue(color));
   }
 
+  function updateNetworkGradient() {
+    if (appearanceScenario !== 'brand-picker') return;
+    const colors = [...socialItems.children]
+      .filter((item) => !item.hidden)
+      .slice(0, 3)
+      .map((item) => getComputedStyle(item).getPropertyValue('--network-color').trim() || defaultSocialColor);
+    const preview = colors.length > 1 ? `linear-gradient(120deg, ${colors.join(', ')})` : colors[0] ?? defaultSocialColor;
+    constructor.style.setProperty('--network-gradient', preview);
+  }
+  new MutationObserver(updateNetworkGradient).observe(socialItems, {
+    childList: true, subtree: true, attributes: true, attributeFilter: ['data-network', 'hidden']
+  });
+
   function renderItemColor(color) {
+    constructor.style.setProperty('--brand-opacity', (color?.opacity ?? 100) + '%');
     const value = socialColorValue(color);
     for (const element of [sel, socialItemStyle, socialStyle]) {
       element.style.setProperty('--social-item-color', value);
@@ -774,7 +792,7 @@
 
   function updateColorModeControls() {
     const branded = draftItemColorMode === 'brand';
-    socialColorToggle.hidden = branded;
+    socialColorToggle.hidden = branded && appearanceScenario !== 'brand-picker';
     socialItemColorLabel.hidden = branded && appearanceScenario !== 'advanced-v2' && !hasWidgetAppearance();
     updateAppearanceCaption();
     socialItemColorModeToggle.querySelector('.btn__caption').textContent = branded ? 'Брендированный' : 'Свой';
@@ -830,8 +848,15 @@
     activeColorTrigger = socialColorToggle;
   }
 
-  function updateSocialColorFields(color) {
-    colorFields.hex.value = color.hex.toUpperCase();
+  function setPickerBrand(branded) {
+    socialColor.dataset.brand = String(branded);
+    colorFields.hex.disabled = branded;
+    colorFields.hex.placeholder = branded ? '' : '#';
+  }
+
+  function updateSocialColorFields(color, branded = false) {
+    setPickerBrand(branded);
+    colorFields.hex.value = branded ? '#00000' : color.hex.toUpperCase();
     colorFields.opacity.value = color.opacity;
     previewSocialColorFields();
   }
@@ -839,6 +864,7 @@
   function readSocialColorFields() {
     const hex = '#' + colorFields.hex.value.trim().replace(/^#/, '').toLowerCase();
     const opacity = colorFields.opacity.valueAsNumber;
+    if (colorFields.hex.disabled) return colorFields.opacity.validity.valid ? { hex: null, opacity } : null;
     if (!/^#[0-9a-f]{6}$/.test(hex) || !colorFields.opacity.validity.valid) return null;
     return { hex, opacity };
   }
@@ -847,7 +873,8 @@
     const color = readSocialColorFields();
     colorFields.hex.setCustomValidity('');
     if (!color) return;
-    renderSocialColor(socialColor, color);
+    if (color.hex) renderSocialColor(socialColor, color);
+    socialColor.style.setProperty('--preview-opacity', color.opacity / 100);
     const reset = socialColorResetValue();
     colorReset.disabled = color.hex === reset.hex && color.opacity === reset.opacity;
   }
@@ -875,7 +902,17 @@
       if (restoreFocus && restoreBorderFocus) socialShapeForm.querySelector('.social-shape__swatch[data-shape-picker="border"]').focus({ preventScroll: true });
       return;
     }
-    if (activeColorTrigger === socialToolbarColorToggle || activeColorTrigger === itemToolbarColor) itemColor = color;
+    const toolbar = activeColorTrigger === socialToolbarColorToggle || activeColorTrigger === itemToolbarColor;
+    if (appearanceScenario === 'brand-picker') {
+      const branded = color?.hex === null;
+      draftItemColorMode = branded ? 'brand' : 'custom';
+      if (toolbar) itemColorMode = draftItemColorMode;
+      if (branded) color = { hex: (toolbar ? itemColor : draftItemColor)?.hex ?? defaultSocialColor, opacity: color.opacity };
+      sel.dataset.colorMode = draftItemColorMode;
+      updateColorModeControls();
+      renderWidgetStyle(toolbar ? appliedStyle : draftStyle);
+    }
+    if (toolbar) itemColor = color;
     else draftItemColor = color;
     renderSocialColor(socialColorToggle, color);
     renderItemColor(color);
@@ -916,12 +953,14 @@
     const activeColor = property
       ? { hex: trigger.dataset.hex || socialColorResetValue().hex, opacity: Number(trigger.dataset.opacity ?? 100) }
       : (fromToolbar ? itemColor : draftItemColor) ?? socialColorResetValue();
-    updateSocialColorFields(activeColor);
+    const brandAvailable = appearanceScenario === 'brand-picker' && !property;
+    $('socialColorBrand').hidden = !brandAvailable;
+    updateSocialColorFields(activeColor, brandAvailable && sel.dataset.colorMode === 'brand');
     initialSocialColor = readSocialColorFields();
     socialColor.hidden = false;
     setPopupTrigger(trigger, true);
     positionSocialColor();
-    colorFields.hex.focus({ preventScroll: true });
+    (colorFields.hex.disabled ? colorFields.opacity : colorFields.hex).focus({ preventScroll: true });
   }
   socialToolbarColorToggle.addEventListener('click', openSocialColor);
   socialColorToggle.addEventListener('click', openSocialColor);
@@ -930,6 +969,7 @@
   }
   socialColor.querySelector('.pe__close').addEventListener('click', () => closeSocialColor(true));
   colorReset.addEventListener('click', () => updateSocialColorFields(socialColorResetValue()));
+  $('socialColorBrand').addEventListener('click', () => applySocialColor({ hex: null, opacity: colorFields.opacity.validity.valid ? colorFields.opacity.valueAsNumber : 100 }));
   $('socialColorOther').addEventListener('click', () => {
     const nativeColor = colorFields.nativeColor;
     nativeColor.value = readSocialColorFields()?.hex ?? defaultSocialColor;
@@ -937,7 +977,10 @@
     else nativeColor.click();
   });
   socialColorForm.addEventListener('input', ({ target }) => {
-    if (target === colorFields.nativeColor) colorFields.hex.value = target.value.toUpperCase();
+    if (target === colorFields.nativeColor) {
+      setPickerBrand(false);
+      colorFields.hex.value = target.value.toUpperCase();
+    }
     previewSocialColorFields();
   });
   socialColorForm.addEventListener('submit', (event) => {
@@ -1571,7 +1614,7 @@
     socialAppearance.hidden = false;
     if (editingWidgetAppearance()) {
       initialWidgetAppearance = { shape: widgetShape, gap: socialItems.style.gap };
-      if (appearanceScenario === 'appearance-window') {
+      if (hasCommonAppearanceWindow()) {
         socialSettingsLayout.after(socialAppearanceSpacing);
         socialAppearanceSpacing.prepend(...directionControls);
       } else {
@@ -2230,7 +2273,7 @@
   scenarioPanelTop.after(scenarios);
 
   function updateDirectionVisibility() {
-    const commonWindow = appearanceScenario === 'appearance-window';
+    const commonWindow = hasCommonAppearanceWindow();
     directionControls[0].hidden = !commonWindow;
     socialDirectionControl.hidden = !commonWindow && !hasInlineDirection();
   }
@@ -2239,11 +2282,14 @@
     if (!socialAppearance.hidden) closeSocialAppearance(false);
     if (!socialList.hidden && activeListTrigger === socialItemGeneralToggle) closeSocialList(false);
     showItemToolbar(null);
+    closeSocialColor(false);
     appearanceScenario = scenario;
     if (activeListTrigger === socialStyleToggle && !socialList.hidden) closeSocialList(false);
     if (hasAdvancedStyle() || activeStyleTrigger !== socialStyleToggle) closeSocialStyle(false);
     socialStyleToggle.setAttribute('aria-controls', hasAdvancedStyle() ? 'socialList' : 'socialStyle');
-    socialList.dataset.appearanceScenario = scenario;
+    socialList.dataset.appearanceScenario = hasCommonAppearanceWindow() ? 'appearance-window' : scenario;
+    constructor.classList.toggle('has-brand-picker', scenario === 'brand-picker');
+    updateNetworkGradient();
     const inlineDirection = hasInlineDirection();
     const widgetAppearance = hasWidgetAppearance();
     const hasContentMenu = inlineDirection || widgetAppearance;
@@ -2253,7 +2299,7 @@
     socialList.classList.toggle('social-list--widget-appearance', widgetAppearance);
     sel.classList.toggle('has-widget-appearance', widgetAppearance);
     sel.classList.toggle('has-in-place-editing', scenario === 'in-place');
-    $('socialItemSettings').querySelector('.social-settings__item-heading').hidden = scenario !== 'appearance-window';
+    $('socialItemSettings').querySelector('.social-settings__item-heading').hidden = !hasCommonAppearanceWindow();
     socialLayoutLabel.textContent = inlineDirection ? 'Направление' : 'Оформление';
     updateDirectionVisibility();
     if (!hasContentMenu && itemContent === 'name') itemContent = 'caption';
