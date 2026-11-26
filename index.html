@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
-<link rel="stylesheet" href="styles.css?v=97">
+<link rel="stylesheet" href="styles.css?v=99">
 </head>
 <body>
 <div id="stage" class="stage">
@@ -226,13 +226,6 @@
                               </div>
                               <button type="button" class="social-size__space-toggle" data-spacing="margin" aria-expanded="false" aria-controls="socialMarginSides" aria-label="Внешние отступы по сторонам">&#xEBCE;</button>
                             </div>
-                            <label class="social-size__spacing social-size__between" id="socialSizeBetween">
-                              <span class="pe__label">Между</span>
-                              <span class="pe__num">
-                                <img src="assets/social-settings/item-gap.svg" class="social-size__axis" width="12" height="12" alt="">
-                                <input class="pe__num-value" type="number" min="0" step="any" name="gap" aria-label="Отступ между пунктами" required>
-                              </span>
-                            </label>
                           </div>
                         </form>
                       </section>
@@ -369,6 +362,9 @@
                           <div class="pe__card social-settings__layout social-appearance__spacing" id="socialAppearanceSpacing" hidden>
                             <label class="pe__label" for="socialAppearanceGap">Между</label>
                             <label class="pe__num"><img src="assets/social-settings/item-gap.svg" alt="" width="12" height="12"><input class="pe__num-value" id="socialAppearanceGap" type="number" min="0" step="any"></label>
+                          </div>
+                          <div class="pe__chips social-appearance__chips" aria-label="Дополнительные свойства">
+                            <span>Скругления</span><span>Границы</span><span>Фон</span><span>Тень</span>
                           </div>
                           <div class="pe__card social-appearance__card">
                             <div class="social-appearance__row">
@@ -669,6 +665,6 @@
 <script src="vendor/ui-kit/components/demo-frame/demo-frame.js"></script>
 <script src="vendor/ui-kit/components/builder-header/builder-header.js?v=3"></script>
 <script src="vendor/ui-kit/components/left-sidebar/left-sidebar.js"></script>
-<script src="app.js?v=85"></script>
+<script src="app.js?v=87"></script>
 </body>
 </html>
