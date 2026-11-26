@@ -41,10 +41,12 @@
   const socialStyleGroupedPresets = $('socialStyleGroupedPresets');
   const socialStyleColorModes = $('socialStyleColorModes');
   const socialStyleContentModes = $('socialStyleContentModes');
+  const socialStyleIconPositions = $('socialStyleIconPositions');
   const socialButtonPresets = $('socialButtonPresets');
   const socialAdd = $('socialAdd');
   const constructor = $('app');
   const socialList = $('socialList');
+  const socialListHead = socialList.querySelector('.pe__head');
   const socialListToggle = $('socialListToggle');
   const socialListToggleIcon = socialListToggle.querySelector('.tb__icon');
   const socialListToggleCaption = socialListToggle.querySelector('.tb__caption');
@@ -57,6 +59,8 @@
   }
   const socialAppearance = $('socialAppearance');
   const socialAppearanceToggle = $('socialAppearanceToggle');
+  const socialAppearanceSpacing = $('socialAppearanceSpacing');
+  const socialAppearanceGap = $('socialAppearanceGap');
   const socialColor = $('socialColor');
   const socialColorToggle = $('socialColorToggle');
   const socialItemColorLabel = $('socialItemColorLabel');
@@ -64,13 +68,27 @@
   const socialColorModeToggle = $('socialColorModeToggle');
   const socialItemColorModeToggle = $('socialItemColorModeToggle');
   const socialSettingsLayout = $('socialSettingsLayout');
+  const directionControls = [...socialSettingsLayout.querySelectorAll('.social-settings__direction')];
+  const socialDirectionControl = directionControls[1];
   const socialContentToggle = $('socialContentToggle');
+  const socialContentControls = $('socialContentControls');
+  const socialIconPositionToggle = $('socialIconPositionToggle');
   const socialContentCaption = $('socialContentCaption');
   const socialContentTumbler = $('socialContentTumbler');
   const socialLayoutLabel = $('socialLayoutLabel');
+  const socialLayoutStyle = socialColorModeToggle.parentElement;
   const socialWidgetDimensions = $('socialWidgetDimensions');
   const socialAppearanceCaption = socialColorModeToggle.querySelector('.btn__caption');
   const socialItemShapeToggle = $('socialItemShapeToggle');
+  const socialItemToolbar = $('socialItemToolbar');
+  const socialItemFontTool = $('socialItemFontTool');
+  const itemToolbarDelete = socialItemToolbar.querySelector('[data-item-command="delete"]');
+  const itemToolbarStyle = socialItemToolbar.querySelector('[data-item-command="style"]');
+  const itemToolbarColor = socialItemToolbar.querySelector('[data-item-command="color"]');
+  const itemToolbarSize = socialItemToolbar.querySelector('[data-item-command="size"]');
+  const socialItemGeneralToggle = $('socialItemGeneralToggle');
+  const socialItemMore = $('socialItemMore');
+  const socialItemLink = $('socialItemLink');
   const socialShapeSettings = $('socialShapeSettings');
   const socialShapeForm = $('socialShapeForm');
   const socialWidgetSizeToggle = $('socialWidgetSizeToggle');
@@ -93,7 +111,10 @@
   const socialListReset = socialList.querySelector('.pe__reset');
   const socialItems = sel.querySelector('.social-items');
   let contextWidgetItems = [...socialItems.children];
-  constructor.append(socialList, socialAdd, socialSize, socialColor);
+  constructor.append(socialList, socialAdd, socialSize, socialColor, socialItemToolbar);
+  let selectedSocialItem = null;
+  let widgetShape = {};
+  let initialWidgetAppearance;
   let listDraft = [];
   let removedItem = null;
   let draftRemovedItem = null;
@@ -124,7 +145,6 @@
     family: '', fontSize: 'px', text: '', icon: '', iconSize: 'px', gap: 'px',
   };
   const shapeColorProperties = new Set(['border', 'background', 'shadow', 'text', 'icon']);
-  let draftStyle = null;
   let itemColor = null;
   let draftItemColor = itemColor;
   let itemColorMode = 'custom';
@@ -134,7 +154,15 @@
   let appearanceScenario;
 
   function hasAdvancedStyle() {
-    return appearanceScenario === 'advanced' || appearanceScenario === 'advanced-v2';
+    return appearanceScenario === 'advanced' || appearanceScenario === 'advanced-v2' || hasWidgetAppearance();
+  }
+
+  function hasWidgetAppearance() {
+    return appearanceScenario === 'in-place' || appearanceScenario === 'appearance-window';
+  }
+
+  function editingWidgetAppearance() {
+    return hasWidgetAppearance() && !socialAppearance.hidden;
   }
 
   function hasInlineDirection() {
@@ -156,7 +184,7 @@
   ];
   const styleClasses = (option) => option.dataset.styleClasses
     ? option.dataset.styleClasses.split(' ')
-    : [...option.firstElementChild.classList].filter((name) => name !== 'btn' && !name.startsWith('btn--size-'));
+    : [...option.firstElementChild.classList].filter((name) => name !== 'btn' && name !== 'btn--icon' && !name.startsWith('btn--size-'));
   const selectedStyle = () => socialStyle.querySelector(':scope > :not([hidden]) .social-style__option[aria-pressed="true"]');
   function addStyleOptions(group, presets, layout) {
     for (const { label, shortLabel = label, classes } of presets) {
@@ -184,17 +212,22 @@
   const switchButtonPresets = [1, 3, 2, 4].map((index) => shapePresets[index]);
   addStyleOptions($('socialStyleSwitchButtons'), switchButtonPresets, 'social-style__tile');
   addStyleOptions($('socialStyleSwitchLinks'), [shapePresets[0]], 'social-style__tile');
-  const groupedPresets = [shapePresets[0], shapePresets[1], shapePresets[3],
-    { label: 'Квадратная со скруглением', classes: 'btn--square' }];
+  const groupedPresets = [
+    { ...shapePresets[0], label: 'Свой цвет, без фона' },
+    { ...shapePresets[1], label: 'Свой цвет, контурная' },
+    { ...shapePresets[3], label: 'Свой цвет, залитая' },
+    { label: 'Свой цвет, квадратная', classes: 'btn--square' },
+  ];
   addStyleOptions($('socialStyleCustomGroup'), groupedPresets, 'social-style__tile');
   addStyleOptions($('socialStyleBrandGroup'), groupedPresets.map((preset) => ({
     ...preset, classes: preset.classes + ' social-button--brand',
+    label: preset.label.replace('Свой цвет', 'Брендированный цвет'),
   })), 'social-style__tile');
   let appliedStyle = selectedStyle();
+  let draftStyle = appliedStyle;
   let displayedStyle = appliedStyle;
 
-  function renderSocialStylePreviews(group, branded = false) {
-    const content = hasInlineDirection() ? itemContent : 'icon';
+  function renderSocialStylePreviews(group, branded = false, content = hasInlineDirection() || hasWidgetAppearance() ? itemContent : 'icon') {
     const items = Array.from(socialItems.children).filter((item) => !item.hidden).slice(0, content === 'icon' ? 3 : 1);
     for (const option of group.querySelectorAll('.social-style__option')) {
       if (!items.length) {
@@ -231,6 +264,7 @@
     displayedStyle = option;
     socialToolbarColorToggle.hidden = sel.dataset.colorMode === 'brand';
     updateWidgetDimensions();
+    positionItemToolbar();
   }
 
   function applySocialStyle(option) {
@@ -239,7 +273,7 @@
   }
 
   function showStyleMenu(group) {
-    for (const menu of [socialStylePreviews, socialStyleSwitchPresets, socialStyleGroupedPresets, socialStyleColorModes, socialStyleContentModes, socialButtonPresets]) {
+    for (const menu of [socialStylePreviews, socialStyleSwitchPresets, socialStyleGroupedPresets, socialStyleColorModes, socialStyleContentModes, socialStyleIconPositions, socialButtonPresets]) {
       menu.hidden = menu !== group;
     }
     socialStyle.classList.toggle('social-style--networks', group === socialStylePreviews);
@@ -282,7 +316,7 @@
       showStyleMenu(socialStyleSwitchPresets);
       renderSocialStylePreviews(socialStyleSwitchPresets, socialStyleBrandSwitch.checked);
       markSocialStyle(socialStyleSwitchPresets, matchStyleOption(socialStyleSwitchPresets, appliedStyle));
-    } else if (appearanceScenario === 'grouped' || appearanceScenario === 'grouped-v2') {
+    } else if (appearanceScenario === 'grouped') {
       showStyleMenu(socialStyleGroupedPresets);
       renderSocialStylePreviews(socialStyleGroupedPresets);
       markSocialStyle(socialStyleGroupedPresets, matchStyleOption(socialStyleGroupedPresets, appliedStyle, itemColorMode === 'brand'));
@@ -302,6 +336,12 @@
   }
 
   function applyItemPresentation(item, option = displayedStyle) {
+    if (!item.querySelector('.social-item__selection')) {
+      const selection = document.createElement('span');
+      selection.className = 'social-item__selection';
+      selection.setAttribute('aria-hidden', 'true');
+      item.append(selection);
+    }
     item.classList.remove(...itemSizes.map((size) => 'btn--size-' + size));
     item.classList.add('btn--size-' + (draftItemLayouts ? draftItemSize : itemSize));
     const layout = (draftItemLayouts ?? itemLayouts).get(itemLayoutKey(option));
@@ -361,15 +401,28 @@
     const popup = socialStyle;
     popup.classList.remove('is-above');
     const panel = popup.getBoundingClientRect();
+    if (activeStyleTrigger === itemToolbarStyle) {
+      const anchor = itemToolbarStyle.getBoundingClientRect();
+      const bounds = constructor.getBoundingClientRect();
+      const toolbar = socialItemToolbar.getBoundingClientRect();
+      const preferredTop = toolbar.bottom - bounds.top;
+      const top = fitPopupTop(popup, preferredTop);
+      const left = top < preferredTop ? bounds.left + sidePopupLeft(popup, toolbar)
+        : Math.max(4, Math.min(anchor.left, window.innerWidth - panel.width - 4));
+      popup.style.left = window.scrollX + left + 'px';
+      popup.style.top = window.scrollY + bounds.top + top + 'px';
+      return;
+    }
     if (activeStyleTrigger !== socialStyleToggle) {
-      if (activeStyleTrigger === socialItemColorModeToggle || activeStyleTrigger === socialContentToggle) {
-        const anchor = activeStyleTrigger.querySelector('.btn__caption').getBoundingClientRect();
-        const alignedLabel = activeStyleTrigger === socialContentToggle
-          ? selectedStyle().querySelector('.social-style__mode-label')
-          : socialStyleColorModes.querySelector('.social-style__mode-label');
-        const label = alignedLabel.getBoundingClientRect();
-        const left = anchor.left - (label.left - panel.left);
-        const top = anchor.top + (anchor.height - label.height) / 2 - (label.top - panel.top);
+      if (activeStyleTrigger === socialItemColorModeToggle || activeStyleTrigger === socialContentToggle ||
+          activeStyleTrigger === socialIconPositionToggle) {
+        const iconPosition = activeStyleTrigger === socialIconPositionToggle;
+        const anchor = activeStyleTrigger.querySelector(iconPosition ? '.social-icon-position__preview' : '.btn__caption').getBoundingClientRect();
+        const alignedElement = popup.querySelector(':scope > :not([hidden]) .social-style__option')
+          .querySelector(iconPosition ? 'img' : '.social-style__mode-label');
+        const aligned = alignedElement.getBoundingClientRect();
+        const left = anchor.left - (aligned.left - panel.left);
+        const top = anchor.top + (anchor.height - aligned.height) / 2 - (aligned.top - panel.top);
         popup.style.left = window.scrollX + Math.max(4, Math.min(left, window.innerWidth - panel.width - 4)) + 'px';
         popup.style.top = window.scrollY + Math.max(4, Math.min(top, window.innerHeight - panel.height - 4)) + 'px';
         return;
@@ -377,7 +430,9 @@
       const anchor = (activeStyleTrigger === socialColorModeToggle ? socialAppearanceCaption : socialItemStyle).getBoundingClientRect();
       const first = popup.querySelector(':scope > :not([hidden]) .social-style__option');
       const sample = (first.firstElementChild ?? first).getBoundingClientRect();
-      const left = anchor.left + (anchor.width - sample.width) / 2 - (sample.left - panel.left);
+      const centeredLeft = anchor.left + (anchor.width - sample.width) / 2 - (sample.left - panel.left);
+      const left = activeStyleTrigger === socialColorModeToggle
+        ? Math.min(centeredLeft, activeStyleTrigger.getBoundingClientRect().left - 8) : centeredLeft;
       const top = anchor.top + (anchor.height - sample.height) / 2 - (sample.top - panel.top);
       popup.style.left = window.scrollX + Math.max(4, Math.min(left, window.innerWidth - panel.width - 4)) + 'px';
       popup.style.top = window.scrollY + Math.max(4, Math.min(top, window.innerHeight - panel.height - 4)) + 'px';
@@ -411,20 +466,29 @@
       popup.style.top = Math.max(gap, top) + 'px';
       return;
     }
-    const toolbar = trigger.closest('.wg__toolbar').getBoundingClientRect();
     if (popup === socialList) {
-      const widget = sel.getBoundingClientRect();
-      const left = pinnedListPosition?.left ?? widget.left - bounds.left - popup.offsetWidth - 6;
-      const anchorTop = pinnedListPosition?.top ?? toolbar.top - bounds.top - 2;
-      const top = Math.min(trigger === socialListToggle ? anchorTop - 10 : anchorTop, constructor.clientHeight - popup.offsetHeight - gap);
+      const itemPanel = trigger === socialItemGeneralToggle;
+      const anchor = (itemPanel ? selectedSocialItem : sel).getBoundingClientRect();
+      const toolbar = itemPanel ? anchor : trigger.closest('.wg__toolbar').getBoundingClientRect();
+      const left = pinnedListPosition?.left ?? (itemPanel
+        ? Math.min(anchor.right - bounds.left + gap, constructor.clientWidth - popup.offsetWidth - gap)
+        : sidePopupLeft(popup, toolbar, 6));
+      const anchorTop = pinnedListPosition?.top ?? toolbar.top - bounds.top - (itemPanel ? 0 : 2);
+      const top = fitPopupTop(popup, trigger === socialListToggle ? anchorTop - 10 : anchorTop);
       if (trigger !== socialListToggle) settingsTop = Math.min(settingsTop, top);
-      popup.style.left = Math.max(gap, left) + 'px';
-      popup.style.top = Math.max(gap, Math.min(top, settingsTop)) + 'px';
+      const finalTop = pinnedListPosition ? top : Math.min(top, settingsTop);
+      const itemToolbar = socialItemToolbar.getBoundingClientRect();
+      const overlapsToolbar = itemPanel && !pinnedListPosition &&
+        finalTop + bounds.top < itemToolbar.bottom && finalTop + bounds.top + popup.offsetHeight > itemToolbar.top &&
+        left + bounds.left < itemToolbar.right && left + bounds.left + popup.offsetWidth > itemToolbar.left;
+      popup.style.left = (overlapsToolbar ? sidePopupLeft(popup, itemToolbar) : Math.max(gap, left)) + 'px';
+      popup.style.top = finalTop + 'px';
       return;
     }
   }
 
   function positionSocialPopups() {
+    positionItemToolbar();
     positionConstructorPopup(socialList, activeListTrigger);
     positionSocialStyle();
     positionConstructorPopup(socialAdd, socialListAdd);
@@ -438,24 +502,47 @@
   }
 
   function sizeDrilledIn() {
-    return activeSizeTrigger !== socialSizeToggle;
+    return activeSizeTrigger === socialItemSizeToggle || activeSizeTrigger === socialWidgetSizeToggle;
   }
 
   function positionSocialSize() {
     if (socialSize.hidden) return;
+    if (activeSizeTrigger === itemToolbarSize) {
+      positionItemPopup(socialSize, itemSizePopupHeight);
+      return;
+    }
     const bounds = constructor.getBoundingClientRect();
     if (sizeDrilledIn()) {
       const panel = socialList.getBoundingClientRect();
-      const top = panel.top - bounds.top;
-      const available = constructor.clientHeight - top - socialSize.querySelector('.pe__head').offsetHeight - 8;
       socialSize.style.left = panel.left - bounds.left + 'px';
-      socialSize.style.top = top + 'px';
-      socialSize.style.setProperty('--social-size-body-height', Math.max(0, available) + 'px');
+      socialSize.style.top = fitPopupTop(socialSize, panel.top - bounds.top) + 'px';
       return;
     }
-    const anchor = socialSizeToggle.getBoundingClientRect();
-    socialSize.style.left = Math.max(8, Math.min(anchor.left - bounds.left, constructor.clientWidth - socialSize.offsetWidth - 8)) + 'px';
-    socialSize.style.top = Math.max(8, anchor.top - bounds.top - socialSize.offsetHeight - 4) + 'px';
+    const toolbar = activeSizeTrigger.closest('.wg__toolbar').getBoundingClientRect();
+    socialSize.style.left = sidePopupLeft(socialSize, toolbar, 6) + 'px';
+    socialSize.style.top = fitPopupTop(socialSize, toolbar.top - bounds.top - 2, widgetSizePopupHeight) + 'px';
+  }
+
+  function fitPopupTop(popup, top, height = popup.offsetHeight) {
+    return Math.max(8, Math.min(top, constructor.clientHeight - height - 8));
+  }
+
+  function sidePopupLeft(popup, anchor, gap = 8) {
+    const bounds = constructor.getBoundingClientRect();
+    const left = anchor.left - bounds.left - popup.offsetWidth - gap;
+    const right = anchor.right - bounds.left + gap;
+    const limit = constructor.clientWidth - popup.offsetWidth - 8;
+    return left >= 8 ? left : right <= limit ? right : Math.max(8, Math.min(left, limit));
+  }
+
+  function positionItemPopup(popup, height = popup.offsetHeight) {
+    const bounds = constructor.getBoundingClientRect();
+    const item = selectedSocialItem.getBoundingClientRect();
+    const top = fitPopupTop(popup, item.top - bounds.top, height);
+    const toolbar = socialItemToolbar.getBoundingClientRect();
+    const anchor = top + bounds.top < toolbar.bottom ? toolbar : item;
+    popup.style.left = sidePopupLeft(popup, anchor) + 'px';
+    popup.style.top = top + 'px';
   }
 
   const spacingProperties = {
@@ -469,6 +556,23 @@
   const sizeReset = socialSize.querySelector('.pe__reset');
   const spacingToggles = Array.from(socialSizeForm.querySelectorAll('[data-spacing]'));
   let initialSize = new Map();
+  let itemSizePopupHeight;
+  let widgetSizePopupHeight;
+
+  function measureExpandedSizePopup() {
+    const groups = spacingToggles.map((toggle) => $(toggle.getAttribute('aria-controls')));
+    const collapsed = groups.filter((group) => group.hidden);
+    for (const group of collapsed) {
+      group.hidden = false;
+      group.previousElementSibling.hidden = true;
+    }
+    const height = socialSize.offsetHeight;
+    for (const group of collapsed) {
+      group.hidden = true;
+      group.previousElementSibling.hidden = false;
+    }
+    return height;
+  }
 
   function readSpacingPair(value) {
     const [first, ...rest] = value.trim().split(/\s*\/\s*/);
@@ -499,10 +603,11 @@
   }
 
   function resetSocialSize() {
-    const itemSettings = activeSizeTrigger === socialItemSizeToggle;
-    const target = itemSettings ? socialItems.querySelector('.social-item:not([hidden])') : sel;
+    const itemSettings = activeSizeTrigger === socialItemSizeToggle || activeSizeTrigger === itemToolbarSize;
+    const target = itemSettings ? itemSizeTarget() : sel;
     const computed = target ? getComputedStyle(target) : null;
-    const layout = itemSettings ? draftItemLayouts.get(itemLayoutKey(draftStyle)) : null;
+    const layout = activeSizeTrigger === itemToolbarSize ? itemLayouts.get(itemLayoutKey(appliedStyle))
+      : itemSettings ? draftItemLayouts.get(itemLayoutKey(draftStyle)) : null;
     sizeFields.width.value = target?.offsetWidth ?? (parseFloat(layout?.width) || itemSizePixels[draftItemSize]);
     sizeFields.height.value = target?.offsetHeight ?? (parseFloat(layout?.height) || itemSizePixels[draftItemSize]);
     for (const axis of ['width', 'height']) {
@@ -527,6 +632,11 @@
     sizeReset.disabled = true;
   }
 
+  function itemSizeTarget() {
+    return activeSizeTrigger === itemToolbarSize || activeListTrigger === socialItemGeneralToggle
+      ? selectedSocialItem : socialItems.querySelector('.social-item:not([hidden])');
+  }
+
   function closeSocialSize(restoreFocus, save = true) {
     if (socialSize.hidden) return;
     if (save && socialSizeForm.checkValidity()) saveSocialSize(false);
@@ -546,14 +656,23 @@
     closeSocialStyle(false);
     closeSocialAdd(false);
     closeSocialColor();
-    const drilledIn = trigger !== socialSizeToggle;
+    const drilledIn = trigger === socialItemSizeToggle || trigger === socialWidgetSizeToggle;
     if (drilledIn) socialList.style.visibility = 'hidden';
     else closeSocialList(false);
     activeSizeTrigger = trigger;
-    socialSizeHeaderSteps.hidden = trigger !== socialItemSizeToggle;
+    if (trigger === itemToolbarSize) {
+      draftItemSize = itemSize;
+      updateItemSizeButtons();
+    }
+    socialSizeHeaderSteps.hidden = trigger !== socialItemSizeToggle && trigger !== itemToolbarSize;
+    socialSize.querySelector('.pe__back').hidden = trigger === itemToolbarSize;
     resetSocialSize();
     socialSize.classList.toggle('is-drilled-in', drilledIn);
     socialSize.hidden = false;
+    if (trigger === itemToolbarSize) {
+      itemSizePopupHeight = measureExpandedSizePopup();
+    }
+    if (trigger === socialSizeToggle) widgetSizePopupHeight = measureExpandedSizePopup();
     setPopupTrigger(trigger, true);
     positionSocialSize();
     sizeFields.width.focus({ preventScroll: true });
@@ -607,8 +726,11 @@
       }
       spacing.push([properties, values]);
     }
-    const key = activeSizeTrigger === socialItemSizeToggle ? itemLayoutKey(draftStyle) : null;
-    const layout = key ? { ...draftItemLayouts.get(key) } : sel.style;
+    const fromItemToolbar = activeSizeTrigger === itemToolbarSize;
+    const layouts = fromItemToolbar ? itemLayouts : draftItemLayouts;
+    const style = fromItemToolbar ? appliedStyle : draftStyle;
+    const key = fromItemToolbar || activeSizeTrigger === socialItemSizeToggle ? itemLayoutKey(style) : null;
+    const layout = key ? { ...layouts.get(key) } : sel.style;
     for (const [properties, [first, second = first]] of spacing) {
       layout[properties[0]] = first + 'px';
       layout[properties[1]] = second + 'px';
@@ -620,8 +742,8 @@
       }
     }
     if (key) {
-      draftItemLayouts.set(key, layout);
-      renderWidgetStyle(draftStyle);
+      layouts.set(key, layout);
+      renderWidgetStyle(style);
     } else {
       if (sizeFields.gap.value !== initialSize.get('gap')) socialItems.style.gap = sizeFields.gap.value + 'px';
       updateWidgetDimensions();
@@ -650,16 +772,26 @@
       element.style.setProperty('--social-item-color', value);
     }
     renderSocialColor(socialToolbarColorToggle, color);
+    renderSocialColor(socialItemToolbar, color);
   }
 
   function updateColorModeControls() {
     const branded = draftItemColorMode === 'brand';
     socialColorToggle.hidden = branded;
-    socialItemColorLabel.hidden = branded && appearanceScenario !== 'advanced-v2';
-    socialAppearanceCaption.textContent = branded ? 'Брендированное' : 'Свое';
+    socialItemColorLabel.hidden = branded && appearanceScenario !== 'advanced-v2' && !hasWidgetAppearance();
+    updateAppearanceCaption();
     socialItemColorModeToggle.querySelector('.btn__caption').textContent = branded ? 'Брендированный' : 'Свой';
     socialItemStyle.dataset.colorMode = draftItemColorMode;
     socialButtonPresets.dataset.colorMode = draftItemColorMode;
+    socialItemToolbar.querySelector('[data-item-command="color"]').hidden = branded;
+  }
+
+  function updateAppearanceCaption() {
+    const branded = draftItemColorMode === 'brand';
+    const preset = hasWidgetAppearance() && matchStyleOption(socialStyleGroupedPresets, draftStyle, branded);
+    socialAppearanceCaption.textContent = preset ? preset.getAttribute('aria-label')
+      : hasWidgetAppearance() ? draftStyle.getAttribute('aria-label')
+      : branded ? 'Брендированное' : 'Свое';
   }
 
   function positionSocialColor() {
@@ -667,6 +799,19 @@
     const bounds = constructor.getBoundingClientRect();
     const anchor = activeColorTrigger.getBoundingClientRect();
     const offset = 4;
+    if (activeColorTrigger === itemToolbarColor) {
+      positionItemPopup(socialColor);
+      return;
+    }
+    if (activeColorTrigger === socialToolbarColorToggle) {
+      const toolbar = activeColorTrigger.closest('.wg__toolbar').getBoundingClientRect();
+      const preferredTop = toolbar.bottom - bounds.top + 6;
+      const top = fitPopupTop(socialColor, preferredTop);
+      socialColor.style.left = (top < preferredTop ? sidePopupLeft(socialColor, toolbar)
+        : Math.min(anchor.left - bounds.left - offset, constructor.clientWidth - socialColor.offsetWidth - 8)) + 'px';
+      socialColor.style.top = top + 'px';
+      return;
+    }
     const left = Math.min(anchor.left - bounds.left - offset, constructor.clientWidth - socialColor.offsetWidth);
     const top = Math.min(anchor.top - bounds.top - offset, constructor.clientHeight - socialColor.offsetHeight);
     socialColor.style.left = Math.max(0, left) + 'px';
@@ -733,7 +878,7 @@
       if (restoreFocus && restoreBorderFocus) socialShapeForm.querySelector('.social-shape__swatch[data-shape-picker="border"]').focus({ preventScroll: true });
       return;
     }
-    if (activeColorTrigger === socialToolbarColorToggle) itemColor = color;
+    if (activeColorTrigger === socialToolbarColorToggle || activeColorTrigger === itemToolbarColor) itemColor = color;
     else draftItemColor = color;
     renderSocialColor(socialColorToggle, color);
     renderItemColor(color);
@@ -765,11 +910,11 @@
     closeSocialStyle(false);
     closeSocialAdd(false);
     closeSocialSize(false);
-    const fromToolbar = trigger === socialToolbarColorToggle;
+    const fromToolbar = trigger === socialToolbarColorToggle || trigger === itemToolbarColor;
     if (fromToolbar) closeSocialList(false);
     activeColorTrigger = trigger;
     const property = trigger.dataset.shapePicker;
-    const shapeTitles = { border: 'Границы', background: 'Фон', text: 'Текст', icon: 'Иконка' };
+    const shapeTitles = { border: 'Границы', background: 'Фон', shadow: 'Тень', text: 'Текст', icon: 'Иконка' };
     $('socialColorTitle').textContent = shapeTitles[property] ?? 'Цвет';
     const activeColor = property
       ? { hex: trigger.dataset.hex || socialColorResetValue().hex, opacity: Number(trigger.dataset.opacity ?? 100) }
@@ -783,7 +928,7 @@
   }
   socialToolbarColorToggle.addEventListener('click', openSocialColor);
   socialColorToggle.addEventListener('click', openSocialColor);
-  for (const trigger of socialShapeForm.querySelectorAll('.social-shape__swatch:not(:disabled)')) {
+  for (const trigger of socialShapeForm.querySelectorAll('.social-shape__swatch')) {
     trigger.addEventListener('click', openSocialColor);
   }
   socialColor.querySelector('.pe__close').addEventListener('click', () => closeSocialColor(true));
@@ -904,12 +1049,17 @@
 
   function removeListItem(entry) {
     if (draftRemovedItem) return;
-    const index = listDraft.indexOf(entry);
-    draftRemovedItem = { entry, index };
-    listDraft.splice(index, 1);
-    entry.button.remove();
+    draftRemovedItem = takeListItem(listDraft, entry);
     renderSocialList();
+    updateWidgetDimensions();
     socialListAdd.focus({ preventScroll: true });
+  }
+
+  function takeListItem(entries, entry) {
+    const index = entries.indexOf(entry);
+    entries.splice(index, 1);
+    entry.button.remove();
+    return { entry, index };
   }
 
   function addListItem() {
@@ -1169,19 +1319,23 @@
   }
 
   function generalSettingsTitle() {
+    if (activeListTrigger === socialItemGeneralToggle) return selectedSocialItem.getAttribute('aria-label');
     if (activeListTrigger !== socialStyleToggle) return 'Соцсети';
-    return appearanceScenario === 'advanced-v2' ? 'Оформление' : 'Стиль';
+    return appearanceScenario === 'advanced-v2' || hasWidgetAppearance() ? 'Оформление' : 'Стиль';
   }
 
   function renderShapeFields() {
-    socialItems.dataset.shapePreview = shapeState;
-    for (const item of socialItems.children) {
-      item.classList.toggle('is-hover', shapeState === 'hover');
-      item.classList.toggle('is-active', shapeState === 'active');
+    const widget = editingWidgetAppearance();
+    if (!widget) {
+      socialItems.dataset.shapePreview = shapeState;
+      for (const item of socialItems.children) {
+        item.classList.toggle('is-hover', shapeState === 'hover');
+        item.classList.toggle('is-active', shapeState === 'active');
+      }
     }
-    const values = draftItemShapes.get(itemLayoutKey(draftStyle))?.[shapeState] ?? {};
+    const values = widget ? widgetShape : draftItemShapes.get(itemLayoutKey(draftStyle))?.[shapeState] ?? {};
     const sample = socialItems.querySelector('.social-item:not([hidden])') ?? socialItemStyle;
-    const css = getComputedStyle(sample);
+    const css = getComputedStyle(widget ? socialItems : sample);
     const icon = getComputedStyle(sample.querySelector('.btn__icon'));
     const caption = getComputedStyle(sample.querySelector('.btn__caption'));
     const presetBorder = css.getPropertyValue(sample.classList.contains('btn--square') ? '--btn-lb' : '--btn-bd').trim();
@@ -1197,7 +1351,7 @@
       radius: corners.every((value) => value === corners[0]) ? corners[0] : '',
       border: borderEnabled ? presetBorderHex : '',
       borderWidth: widths.every((value) => value === widths[0]) ? widths[0] : '',
-      background: readShapeHex(sample.classList.contains('btn--square') && !values.background
+      background: readShapeHex(!widget && sample.classList.contains('btn--square') && !values.background
         ? getComputedStyle(sample, '::before').backgroundColor
         : css.backgroundColor),
       shadow: readShapeHex(css.boxShadow.match(/rgba?\([^)]+\)/g)?.at(-1) ?? ''),
@@ -1277,13 +1431,8 @@
   function openSocialShape() {
     closeSocialStyle(false);
     closeSocialColor();
-    shapeState = 'rest';
-    $('shapeStrokeMenu').hidden = true;
-    socialShapeForm.querySelector('.social-shape__line-button').setAttribute('aria-expanded', 'false');
+    resetGeometryControls();
     socialShapeSettings.dataset.colorMode = draftItemColorMode;
-    for (const button of socialShapeForm.querySelectorAll('.social-shape__expand')) {
-      button.setAttribute('aria-expanded', 'false');
-    }
     shapeEntry = draftItemShapes.get(itemLayoutKey(draftStyle));
     renderShapeFields();
     socialListBody.hidden = true;
@@ -1293,6 +1442,28 @@
     setPopupTrigger(socialItemShapeToggle, true);
     positionConstructorPopup(socialList, activeListTrigger);
     socialListBack.focus({ preventScroll: true });
+  }
+
+  function resetGeometryControls() {
+    shapeState = 'rest';
+    $('shapeStrokeMenu').hidden = true;
+    for (const control of socialShapeForm.querySelectorAll('.social-shape__expand, .social-shape__line-button')) {
+      control.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function applyWidgetAppearance() {
+    const { radius, radiusCorners, borderEnabled, stroke, border, background, shadow } = widgetShape;
+    const style = socialItems.style;
+    style.borderRadius = radiusCorners?.map((corner) => corner + 'px').join(' ') || (radius ? radius + 'px' : '');
+    style.borderStyle = borderEnabled ? stroke || 'solid' : '';
+    style.borderWidth = borderEnabled ? shapeBorderWidths(widgetShape, 1).map((width) => width + 'px').join(' ') : '';
+    style.borderColor = borderEnabled && border ? socialColorValue(border) : '';
+    style.backgroundColor = background ? socialColorValue(background) : '';
+    style.boxShadow = shadow ? '0 2px 6px ' + socialColorValue(shadow) : '';
+    updateColorModeControls();
+    updateWidgetDimensions();
+    positionSocialPopups();
   }
 
   function closeSocialShape(restoreFocus) {
@@ -1312,6 +1483,11 @@
   }
 
   function editShapeFields(changes) {
+    if (editingWidgetAppearance()) {
+      widgetShape = { ...widgetShape, ...changes };
+      applyWidgetAppearance();
+      return;
+    }
     const key = itemLayoutKey(draftStyle);
     const shape = draftItemShapes.get(key);
     const values = { ...shape?.[shapeState], ...changes };
@@ -1319,7 +1495,7 @@
     renderWidgetStyle(draftStyle);
   }
 
-  socialShapeSettings.addEventListener('click', (event) => {
+  function handleShapeClick(event) {
     const tab = event.target.closest('[data-shape-state]');
     const clear = event.target.closest('[data-clear]');
     const expand = event.target.closest('.social-shape__expand');
@@ -1341,7 +1517,7 @@
       renderShapeFields();
       positionConstructorPopup(socialList, activeListTrigger);
     } else if (borderToggle) {
-      if (borderToggle.dataset.borderEnabled === 'true' && draftItemColorMode !== 'brand') {
+      if (borderToggle.dataset.borderEnabled === 'true' && (editingWidgetAppearance() || draftItemColorMode !== 'brand')) {
         openSocialColor({ currentTarget: borderToggle });
         return;
       }
@@ -1353,7 +1529,9 @@
       editShapeFields({ borderEnabled: true, stroke: stroke.dataset.stroke, borderWidth: socialShapeForm.elements.borderWidth.value || '1' });
       renderShapeFields();
     }
-  });
+  }
+  socialShapeForm.addEventListener('click', handleShapeClick);
+  socialShapeSettings.querySelector('.social-shape__states').addEventListener('click', handleShapeClick);
   socialShapeForm.addEventListener('input', ({ target }) => {
     if (!target.name || !target.validity.valid) return;
     const fields = socialShapeForm.elements;
@@ -1386,34 +1564,65 @@
     $('socialListTitle').textContent = 'Оформление';
     socialAppearance.prepend(socialSettingsLayout);
     socialAppearanceToggle.hidden = true;
-    for (const control of socialSettingsLayout.querySelectorAll('.social-settings__direction')) control.hidden = false;
+    for (const control of directionControls) control.hidden = false;
     socialListBody.hidden = true;
-    socialListBack.hidden = false;
+    const standalone = activeListTrigger === socialStyleToggle && hasWidgetAppearance();
+    if (standalone) settingsTop = Infinity;
+    socialListBack.hidden = standalone;
+    socialList.classList.toggle('social-list--direct-appearance', standalone);
     socialListReset.disabled = true;
     socialAppearance.hidden = false;
-    if (activeListTrigger === socialStyleToggle) positionConstructorPopup(socialList, activeListTrigger);
+    if (editingWidgetAppearance()) {
+      initialWidgetAppearance = { shape: widgetShape, gap: socialItems.style.gap };
+      socialAppearance.prepend(socialAppearanceSpacing);
+      socialAppearanceSpacing.prepend(socialLayoutLabel, socialLayoutStyle);
+      socialSettingsLayout.prepend(...directionControls);
+      socialLayoutLabel.textContent = 'Стиль';
+      socialAppearanceSpacing.hidden = false;
+      socialAppearanceGap.value = parseFloat(getComputedStyle(socialItems).gap) || 0;
+      socialAppearance.append(socialShapeForm);
+      socialShapeForm.querySelector('[data-shape-picker="shadow"]').disabled = false;
+      resetGeometryControls();
+      socialListReset.disabled = false;
+      updateColorModeControls();
+      renderShapeFields();
+    }
+    positionConstructorPopup(socialList, activeListTrigger);
     setPopupTrigger(socialAppearanceToggle, true);
-    socialListBack.focus({ preventScroll: true });
+    (standalone ? socialListHead.querySelector('.pe__done') : socialListBack).focus({ preventScroll: true });
   }
 
   function closeSocialAppearance(restoreFocus) {
     if (socialAppearance.hidden) return;
-    if (activeStyleTrigger === socialColorModeToggle) closeSocialStyle(false);
+    if ([socialColorModeToggle, socialContentToggle, socialIconPositionToggle].includes(activeStyleTrigger)) closeSocialStyle(false);
     closeSocialColor();
     $('socialListTitle').textContent = generalSettingsTitle();
     socialWidgetDimensions.before(socialSettingsLayout);
+    $('socialItemLinkRow').after(socialLayoutLabel, socialLayoutStyle, socialAppearanceToggle, ...directionControls);
+    socialAppearance.prepend(socialAppearanceSpacing);
+    socialLayoutLabel.textContent = hasInlineDirection() ? 'Направление' : 'Оформление';
     socialAppearanceToggle.hidden = false;
-    for (const control of socialSettingsLayout.querySelectorAll('.social-settings__direction')) {
-      control.hidden = !hasInlineDirection() || control.matches('.pe__label');
-    }
+    updateDirectionVisibility();
+    socialAppearanceSpacing.hidden = true;
+    socialShapeSettings.append(socialShapeForm);
+    socialShapeForm.querySelector('[data-shape-picker="shadow"]').disabled = true;
     socialAppearance.hidden = true;
+    socialList.classList.remove('social-list--direct-appearance');
     socialListBack.hidden = true;
     socialListBody.hidden = false;
     socialListReset.disabled = false;
-    if (activeListTrigger === socialStyleToggle) positionConstructorPopup(socialList, activeListTrigger);
+    updateColorModeControls();
+    positionConstructorPopup(socialList, activeListTrigger);
     setPopupTrigger(socialAppearanceToggle, false);
     if (restoreFocus) socialAppearanceToggle.focus({ preventScroll: true });
   }
+
+  socialAppearanceGap.addEventListener('input', () => {
+    if (!socialAppearanceGap.validity.valid || socialAppearanceGap.value === '') return;
+    socialItems.style.gap = socialAppearanceGap.value + 'px';
+    updateWidgetDimensions();
+    positionSocialPopups();
+  });
 
   function closeSocialList(restoreFocus) {
     if (socialList.hidden) return;
@@ -1463,6 +1672,7 @@
   function applyWidgetContent(content, direction, iconPosition = itemIconPosition) {
     socialItems.dataset.direction = direction;
     socialItems.dataset.iconPosition = iconPosition;
+    socialItemFontTool.hidden = content !== 'caption';
     for (const item of socialItems.children) renderItemContent(item, content);
     updateWidgetDimensions();
   }
@@ -1495,12 +1705,15 @@
     socialItemStyle.classList.add(...styleClasses(option).filter((name) => name !== 'social-button--brand'));
     const label = option.getAttribute('aria-label');
     socialItemStyle.setAttribute('aria-label', 'Стиль пунктов: ' + label);
+    updateAppearanceCaption();
     updateSocialStylePreview();
   }
 
   function updateSocialStylePreview() {
     const content = currentItemContent();
     const position = socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value;
+    socialIconPositionToggle.dataset.iconPosition = position;
+    socialIconPositionToggle.setAttribute('aria-label', 'Положение иконки: ' + (position === 'right' ? 'справа' : 'слева'));
     socialItemStyle.dataset.iconPosition = position;
     socialButtonPresets.dataset.iconPosition = position;
     for (const preview of formPreviews) renderItemContent(preview, content);
@@ -1513,7 +1726,7 @@
     draftItemShapes = new Map(itemShapes);
     draftItemSize = itemSize;
     selectItemContent(itemContent);
-    socialSettingsLayout.querySelector(`[name="socialDirection"][value="${itemDirection}"]`).checked = true;
+    socialDirectionControl.querySelector(`[value="${itemDirection}"]`).checked = true;
     socialSettingsLayout.querySelector(`[name="socialIconPosition"][value="${itemIconPosition}"]`).checked = true;
     applyWidgetContent(itemContent, itemDirection);
     setDraftStyle(appliedStyle);
@@ -1532,7 +1745,7 @@
     itemColorMode = draftItemColorMode;
     itemSize = draftItemSize;
     itemContent = currentItemContent();
-    itemDirection = socialSettingsLayout.querySelector('[name="socialDirection"]:checked').value;
+    itemDirection = socialDirectionControl.querySelector(':checked').value;
     itemIconPosition = socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value;
     for (const [key, layout] of draftItemLayouts) itemLayouts.set(key, layout);
     for (const [key, shape] of draftItemShapes) itemShapes.set(key, shape);
@@ -1542,19 +1755,21 @@
   function previewSocialContent() {
     updateSocialStylePreview();
     applyWidgetContent(currentItemContent(),
-      socialSettingsLayout.querySelector('[name="socialDirection"]:checked').value,
+      socialDirectionControl.querySelector(':checked').value,
       socialSettingsLayout.querySelector('[name="socialIconPosition"]:checked').value);
-    positionConstructorPopup(socialList, activeListTrigger);
+    positionSocialPopups();
   }
   socialSettingsLayout.addEventListener('change', previewSocialContent);
   for (const button of itemSizeButtons) {
     button.addEventListener('click', () => {
-      const index = itemSizes.indexOf(draftItemSize) + Number(button.dataset.socialSizeStep);
+      const standalone = activeSizeTrigger === itemToolbarSize;
+      const index = itemSizes.indexOf(standalone ? itemSize : draftItemSize) + Number(button.dataset.socialSizeStep);
       draftItemSize = itemSizes[index];
-      renderWidgetStyle(draftStyle);
+      if (standalone) itemSize = draftItemSize;
+      renderWidgetStyle(standalone ? appliedStyle : draftStyle);
       updateItemSizeButtons();
       if (socialSizeHeaderSteps.contains(button)) {
-        const target = socialItems.querySelector('.social-item:not([hidden])');
+        const target = itemSizeTarget();
         for (const axis of ['width', 'height']) {
           const mode = axis + 'Mode';
           if (initialSize.get(mode) !== 'auto' || sizeFields[mode].value !== 'auto') continue;
@@ -1564,6 +1779,32 @@
       }
     });
   }
+
+  socialListHead.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || event.target.closest('button, input, a') || activeListTrigger === socialListToggle) return;
+    event.preventDefault();
+    closeSocialStyle(false);
+    closeSocialColor(false);
+    const { pointerId, clientX, clientY } = event;
+    const bounds = constructor.getBoundingClientRect();
+    const scale = bounds.width / constructor.offsetWidth;
+    const left = socialList.offsetLeft;
+    const top = socialList.offsetTop;
+    socialListHead.setPointerCapture(pointerId);
+    socialListHead.classList.add('is-dragging');
+    const move = (pointer) => {
+      pinnedListPosition = {
+        left: Math.max(8, Math.min(left + (pointer.clientX - clientX) / scale, constructor.clientWidth - socialList.offsetWidth - 8)),
+        top: fitPopupTop(socialList, top + (pointer.clientY - clientY) / scale),
+      };
+      positionSocialPopups();
+    };
+    socialListHead.addEventListener('pointermove', move);
+    socialListHead.addEventListener('lostpointercapture', () => {
+      socialListHead.removeEventListener('pointermove', move);
+      socialListHead.classList.remove('is-dragging');
+    }, { once: true });
+  });
 
   function openSocialList(event, position = null) {
     const trigger = event.currentTarget;
@@ -1580,13 +1821,18 @@
     const general = trigger !== socialListToggle;
     socialList.classList.toggle('social-list--networks', !general);
     socialList.classList.toggle('social-list--style-only', trigger === socialStyleToggle);
+    const itemPanel = trigger === socialItemGeneralToggle;
+    socialList.classList.toggle('social-list--item', itemPanel);
+    $('socialItemLinkRow').hidden = !itemPanel;
+    if (itemPanel) resetItemLink();
     $('socialListTitle').textContent = general ? generalSettingsTitle() : 'Соцсети';
     socialGeneralFields.hidden = !general;
     if (general) resetSocialGeneral();
     socialList.hidden = false;
     setPopupTrigger(trigger, true);
     savedWidgetItems = [...socialItems.children];
-    resetSocialList();
+    if (itemPanel) positionConstructorPopup(socialList, trigger);
+    else resetSocialList();
     socialList.querySelector('.pe__close').focus({ preventScroll: true });
   }
   socialListToggle.addEventListener('click', openSocialList);
@@ -1600,13 +1846,20 @@
   });
   socialListReset.addEventListener('click', () => {
     closeSocialColor();
-    if (!socialShapeSettings.hidden) {
+    if (editingWidgetAppearance()) {
+      widgetShape = initialWidgetAppearance.shape;
+      socialItems.style.gap = initialWidgetAppearance.gap;
+      socialAppearanceGap.value = parseFloat(getComputedStyle(socialItems).gap) || 0;
+      applyWidgetAppearance();
+      renderShapeFields();
+    } else if (!socialShapeSettings.hidden) {
       draftItemShapes.set(itemLayoutKey(draftStyle), shapeEntry);
       renderShapeFields();
       renderWidgetStyle(draftStyle);
     } else {
       if (activeListTrigger !== socialListToggle) resetSocialGeneral();
-      resetSocialList();
+      if (activeListTrigger === socialItemGeneralToggle) resetItemLink();
+      else resetSocialList();
     }
   });
   socialListAdd.addEventListener('click', addListItem);
@@ -1615,7 +1868,7 @@
       closeSocialShape(true);
       return;
     }
-    if (!socialAppearance.hidden) {
+    if (!socialAppearance.hidden && !socialList.classList.contains('social-list--direct-appearance')) {
       closeSocialAppearance(true);
       return;
     }
@@ -1625,6 +1878,11 @@
   });
 
   function saveSocialList() {
+    if (activeListTrigger === socialItemGeneralToggle) {
+      selectedSocialItem.dataset.link = socialItemLink.value.trim();
+      saveSocialGeneral();
+      return;
+    }
     if (activeListTrigger === socialStyleToggle) {
       saveSocialGeneral();
       return;
@@ -1648,11 +1906,88 @@
     if (activeListTrigger !== socialListToggle) saveSocialGeneral();
   }
 
+  function resetItemLink() {
+    socialItemLink.value = selectedSocialItem.dataset.link || '';
+    const icon = selectedSocialItem.querySelector('.btn__icon').cloneNode(true);
+    icon.hidden = false;
+    $('socialItemLinkIcon').replaceChildren(icon);
+  }
+
+  function positionItemToolbar() {
+    const item = selectedSocialItem;
+    if (!item || socialItemToolbar.hidden) return;
+    const bounds = constructor.getBoundingClientRect();
+    const anchor = item.getBoundingClientRect();
+    const widget = sel.getBoundingClientRect();
+    socialItemToolbar.style.left = anchor.left - bounds.left + 'px';
+    socialItemToolbar.style.top = widget.top - bounds.top - socialItemToolbar.offsetHeight - 8 + 'px';
+  }
+
+  function dismissItemMore() {
+    socialItemMore.hidden = true;
+    socialItemToolbar.querySelector('[data-item-command="more"]').setAttribute('aria-expanded', 'false');
+  }
+
+  function showItemToolbar(item) {
+    selectedSocialItem?.classList.remove('is-selected-item');
+    selectedSocialItem = item;
+    item?.classList.add('is-selected-item');
+    sel.classList.toggle('has-selected-social-item', Boolean(item));
+    socialItemToolbar.hidden = !item;
+    dismissItemMore();
+    if (!item) return;
+    itemToolbarDelete.hidden = Boolean(sel.dataset.context ?? demoContext);
+    itemToolbarDelete.disabled = Boolean(removedItem);
+    socialItemToolbar.querySelector('[data-item-command="color"]').hidden = sel.dataset.colorMode === 'brand';
+    positionItemToolbar();
+  }
+
+  socialItems.addEventListener('click', ({ target }) => {
+    const item = target.closest('.social-item');
+    if (appearanceScenario !== 'in-place' || !item) return;
+    closeSocialList(false);
+    showItemToolbar(item);
+    socialItemGeneralToggle.focus({ preventScroll: true });
+  });
+  socialItemToolbar.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-item-command]');
+    if (!button) return;
+    const item = selectedSocialItem;
+    if (!item) return;
+    const { itemCommand: command } = button.dataset;
+    if (command === 'back') {
+      closeSocialList(false);
+      showItemToolbar(null);
+      socialGeneralToggle.focus({ preventScroll: true });
+    } else if (command === 'more') {
+      const expand = socialItemMore.hidden;
+      const link = item.dataset.link?.trim();
+      const anchor = socialItemMore.querySelector('a');
+      const available = Boolean(link && URL.canParse(link) && ['http:', 'https:'].includes(new URL(link).protocol));
+      if (available) anchor.href = link;
+      else anchor.removeAttribute('href');
+      socialItemMore.hidden = !expand;
+      button.setAttribute('aria-expanded', String(expand));
+    } else if (command === 'delete') {
+      closeSocialList(false);
+      if (removedItem || (sel.dataset.context ?? demoContext)) return;
+      const entries = readListEntries(socialItems.children);
+      removedItem = takeListItem(entries, entries.find((entry) => entry.button === item));
+      showItemToolbar(null);
+      if (socialItems.firstElementChild) socialItems.firstElementChild.focus({ preventScroll: true });
+      else socialListToggle.focus({ preventScroll: true });
+      updateWidgetDimensions();
+    } else if (command === 'settings') openSocialList({ currentTarget: socialItemGeneralToggle });
+    else if (command === 'style') toggleSocialStyle({ currentTarget: button });
+    else if (command === 'color') openSocialColor({ currentTarget: button });
+    else if (command === 'size') openSocialSize({ currentTarget: button });
+  });
+
   function closeSocialStyle(restoreFocus) {
     if (socialStyle.hidden) return;
     socialStyle.hidden = true;
     if (activeStyleTrigger !== socialStyleToggle) {
-      if (activeStyleTrigger === socialItemStyle) markSocialStyle(socialButtonPresets, previousButtonStyle);
+      if (activeStyleTrigger === socialItemStyle || activeStyleTrigger === itemToolbarStyle) markSocialStyle(socialButtonPresets, previousButtonStyle);
       previousButtonStyle = null;
       showStyleMenu(socialStylePreviews);
       socialStyle.classList.remove('social-style--settings');
@@ -1673,12 +2008,16 @@
     openSocialStyle(trigger);
   }
   socialStyleToggle.addEventListener('click', (event) => {
-    if (hasAdvancedStyle()) openSocialList(event);
+    if (hasAdvancedStyle()) {
+      openSocialList(event);
+      if (hasWidgetAppearance() && !socialList.hidden) openSocialAppearance();
+    }
     else toggleSocialStyle(event);
   });
   socialColorModeToggle.addEventListener('click', toggleSocialStyle);
   socialItemColorModeToggle.addEventListener('click', toggleSocialStyle);
   socialContentToggle.addEventListener('click', toggleSocialStyle);
+  socialIconPositionToggle.addEventListener('click', toggleSocialStyle);
   socialItemStyle.addEventListener('click', toggleSocialStyle);
 
   function openSocialStyle(trigger) {
@@ -1687,23 +2026,30 @@
     closeSocialAdd(false);
     closeSocialSize(false);
     if (trigger !== socialStyleToggle) {
+      if (trigger === itemToolbarStyle) closeSocialList(false);
       socialStyle.classList.add('social-style--settings');
       document.body.append(socialStyle);
       if (trigger === socialContentToggle) {
         showStyleMenu(socialStyleContentModes);
         markSocialStyle(socialStyleContentModes, contentModeOption(currentItemContent()));
+      } else if (trigger === socialIconPositionToggle) {
+        showStyleMenu(socialStyleIconPositions);
+        markSocialStyle(socialStyleIconPositions, socialStyleIconPositions.querySelector(`[data-icon-position="${trigger.dataset.iconPosition}"]`));
       } else if (trigger === socialItemColorModeToggle) {
         showStyleMenu(socialStyleColorModes);
         const selected = socialStyleColorModes.querySelector(`[data-color-mode="${draftItemColorMode}"]`);
         markSocialStyle(socialStyleColorModes, selected);
       } else if (trigger === socialColorModeToggle) {
         showStyleMenu(socialStyleGroupedPresets);
-        renderSocialStylePreviews(socialStyleGroupedPresets);
+        renderSocialStylePreviews(socialStyleGroupedPresets, false, 'icon');
         markSocialStyle(socialStyleGroupedPresets, matchStyleOption(socialStyleGroupedPresets, draftStyle, draftItemColorMode === 'brand'));
       } else {
         previousButtonStyle = socialButtonPresets.querySelector('.social-style__option[aria-pressed="true"]');
         showStyleMenu(socialButtonPresets);
-        markSocialStyle(socialButtonPresets, matchStyleOption(socialButtonPresets, draftStyle));
+        if (trigger === itemToolbarStyle) {
+          for (const preview of formPreviews) renderItemContent(preview, itemContent);
+        }
+        markSocialStyle(socialButtonPresets, matchStyleOption(socialButtonPresets, trigger === itemToolbarStyle ? appliedStyle : draftStyle));
       }
     } else {
       closeSocialList(false);
@@ -1721,20 +2067,27 @@
   socialStyle.addEventListener('click', (event) => {
     const option = event.target.closest('.social-style__option');
     if (!option) return;
+    if (activeStyleTrigger === socialIconPositionToggle) {
+      socialSettingsLayout.querySelector(`[name="socialIconPosition"][value="${option.dataset.iconPosition}"]`).checked = true;
+      closeSocialStyle(true);
+      previewSocialContent();
+      return;
+    }
     if (activeStyleTrigger === socialContentToggle) {
       selectItemContent(option.dataset.contentMode);
       closeSocialStyle(true);
       previewSocialContent();
       return;
     }
-    if (activeStyleTrigger !== socialStyleToggle) {
+    if (activeStyleTrigger === itemToolbarStyle) selectSocialStyle(option);
+    else if (activeStyleTrigger !== socialStyleToggle) {
       if (activeStyleTrigger === socialColorModeToggle || activeStyleTrigger === socialItemColorModeToggle) {
         draftItemColorMode = option.dataset.colorMode
           ?? (styleClasses(option).includes('social-button--brand') ? 'brand' : 'custom');
         sel.dataset.colorMode = draftItemColorMode;
         updateColorModeControls();
       }
-      if (activeStyleTrigger !== socialItemColorModeToggle) setDraftStyle(option);
+      if (!option.dataset.colorMode) setDraftStyle(option);
       renderWidgetStyle(draftStyle);
     }
     else selectToolbarStyle(option);
@@ -1752,28 +2105,38 @@
     if (!socialAdd.hidden && !socialAdd.contains(event.target) && !socialListAdd.contains(event.target)) {
       closeSocialAdd(false);
     }
-    const insideDrillIn = sizeDrilledIn() && socialSize.contains(event.target);
+    const insideSize = !socialSize.hidden && socialSize.contains(event.target);
+    const insideDrillIn = sizeDrilledIn() && insideSize;
     if (!socialList.hidden && !socialList.contains(event.target) && !activeListTrigger.contains(event.target) &&
-        !socialAdd.contains(event.target) && !insideColor && !insideStyle && !insideDrillIn) {
+        !socialAdd.contains(event.target) && !insideColor && !insideStyle && !insideDrillIn &&
+        !socialItemToolbar.contains(event.target)) {
       closeSocialList(false);
     }
     if (!socialSize.hidden && !socialSize.contains(event.target) && !activeSizeTrigger.contains(event.target)) {
       closeSocialSize(false);
     }
+    if (!socialItems.contains(event.target) && !event.target.closest('.social-item-toolbar') &&
+        !insideColor && !insideStyle && !insideSize && !socialList.contains(event.target)) {
+      showItemToolbar(null);
+    }
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (socialColor.hidden && socialStyle.hidden && socialAdd.hidden && socialList.hidden && socialSize.hidden) return;
+    if (socialColor.hidden && socialStyle.hidden && socialAdd.hidden && socialList.hidden && socialSize.hidden) {
+      if (!socialItemToolbar.hidden) showItemToolbar(null);
+      return;
+    }
     event.preventDefault();
     if (!socialColor.hidden) closeSocialColor(true);
     else if (!socialSize.hidden) closeSocialSize(true);
     else if (!socialStyle.hidden) closeSocialStyle(true);
     else if (!socialAdd.hidden) closeSocialAdd(true);
-    else if (!socialAppearance.hidden) closeSocialAppearance(true);
+    else if (!socialAppearance.hidden && !socialList.classList.contains('social-list--direct-appearance')) closeSocialAppearance(true);
     else if (!socialShapeSettings.hidden) closeSocialShape(true);
     else closeSocialList(true);
   });
   window.addEventListener('resize', positionSocialPopups);
+  scroller.addEventListener('scroll', positionSocialPopups);
 
   const chain = [];
   for (let c = sel.parentElement && sel.parentElement.closest('.stk'); c; c = c.parentElement && c.parentElement.closest('.stk')) chain.push(c);
@@ -1860,21 +2223,35 @@
   scenarioPanelTop.append(scenarios.querySelector('#socialScenarioGroups'));
   scenarioPanelTop.after(scenarios);
 
+  function updateDirectionVisibility() {
+    const commonWindow = appearanceScenario === 'appearance-window';
+    directionControls[0].hidden = !commonWindow;
+    socialDirectionControl.hidden = !commonWindow && !hasInlineDirection();
+  }
+
   function setAppearanceScenario(scenario) {
     if (!socialAppearance.hidden) closeSocialAppearance(false);
+    if (!socialList.hidden && activeListTrigger === socialItemGeneralToggle) closeSocialList(false);
+    showItemToolbar(null);
     appearanceScenario = scenario;
     if (activeListTrigger === socialStyleToggle && !socialList.hidden) closeSocialList(false);
     if (hasAdvancedStyle() || activeStyleTrigger !== socialStyleToggle) closeSocialStyle(false);
     socialStyleToggle.setAttribute('aria-controls', hasAdvancedStyle() ? 'socialList' : 'socialStyle');
     socialList.dataset.appearanceScenario = scenario;
     const inlineDirection = hasInlineDirection();
-    socialContentToggle.hidden = !inlineDirection;
-    socialContentTumbler.hidden = inlineDirection;
+    const widgetAppearance = hasWidgetAppearance();
+    const hasContentMenu = inlineDirection || widgetAppearance;
+    socialContentControls.hidden = !hasContentMenu;
+    socialContentTumbler.hidden = hasContentMenu;
     socialList.classList.toggle('social-list--inline-direction', inlineDirection);
+    socialList.classList.toggle('social-list--widget-appearance', widgetAppearance);
+    sel.classList.toggle('has-widget-appearance', widgetAppearance);
+    sel.classList.toggle('has-in-place-editing', scenario === 'in-place');
+    $('socialItemSettings').querySelector('.social-settings__item-heading').hidden = scenario !== 'appearance-window';
     socialLayoutLabel.textContent = inlineDirection ? 'Направление' : 'Оформление';
-    socialSettingsLayout.querySelector('.tumbler.social-settings__direction').hidden = !inlineDirection;
-    if (!inlineDirection && itemContent === 'name') itemContent = 'caption';
-    if (!inlineDirection && currentItemContent() === 'name') {
+    updateDirectionVisibility();
+    if (!hasContentMenu && itemContent === 'name') itemContent = 'caption';
+    if (!hasContentMenu && currentItemContent() === 'name') {
       selectItemContent('caption');
       if (draftItemLayouts) previewSocialContent();
       else applyWidgetContent(itemContent, itemDirection);
@@ -1892,6 +2269,20 @@
   }
 
   setAppearanceScenario(frame.panel.querySelector('[name="socialAppearanceScenario"]:checked').value);
+  const archive = $('socialScenarioArchive');
+  archive.addEventListener('toggle', () => {
+    if (archive.open || !archive.querySelector('input:checked')) return;
+    const itemOption = archive.querySelector('[name="socialItemScenario"]:checked');
+    if (itemOption) {
+      itemOption.checked = false;
+      itemScenario = 'always-visible';
+      if (!socialList.hidden && activeListTrigger !== socialItemGeneralToggle) renderSocialList();
+      if (!socialAdd.hidden && socialListAdd.hidden) closeSocialAdd(false);
+    }
+    const first = scenarioPanelTop.querySelector('[name="socialAppearanceScenario"]');
+    first.checked = true;
+    setAppearanceScenario(first.value);
+  });
   frame.panel.addEventListener('change', ({ target }) => {
     if (target.name === 'socialItemScenario') {
       itemScenario = target.value;

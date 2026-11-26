@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="vendor/ui-kit/components/widget/widget.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/property-editor/property-editor.css">
 <link rel="stylesheet" href="vendor/ui-kit/components/input/input.css">
-<link rel="stylesheet" href="styles.css?v=87">
+<link rel="stylesheet" href="styles.css?v=96">
 </head>
 <body>
 <div id="stage" class="stage">
@@ -274,6 +274,10 @@
                           </div>
                           <div class="social-settings" id="socialGeneralFields" hidden>
                             <div class="pe__card social-settings__layout" id="socialSettingsLayout">
+                              <label class="social-item-link" id="socialItemLinkRow" hidden>
+                                <span class="social-list__icon" id="socialItemLinkIcon" aria-hidden="true"></span>
+                                <input class="pe__num-value" type="text" inputmode="url" aria-label="Ссылка соцсети" id="socialItemLink">
+                              </label>
                               <span class="pe__label" id="socialLayoutLabel">Оформление</span>
                               <div class="social-settings__style">
                                 <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font" id="socialColorModeToggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle"><span class="btn__caption">Свое</span></button>
@@ -293,9 +297,14 @@
                                 </label>
                               </div>
                               <span class="pe__label" id="socialContentLabel">Показывать</span>
-                              <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font social-settings__show" id="socialContentToggle" aria-labelledby="socialContentLabel socialContentCaption" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle" hidden>
-                                <span class="btn__caption" id="socialContentCaption">Только иконку</span>
-                              </button>
+                              <div class="social-settings__show social-settings__content-controls" id="socialContentControls" hidden>
+                                <button type="button" class="btn btn--link btn--style-link btn--size-m social-settings__font" id="socialContentToggle" aria-labelledby="socialContentLabel socialContentCaption" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle">
+                                  <span class="btn__caption" id="socialContentCaption">Только иконку</span>
+                                </button>
+                                <button type="button" class="btn btn--link btn--style-secondary btn--size-m btn--icon" id="socialIconPositionToggle" aria-label="Положение иконки: слева" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle">
+                                  <span class="social-icon-position__preview" aria-hidden="true"></span>
+                                </button>
+                              </div>
                               <div class="tumbler tumbler--size-m social-settings__show" id="socialContentTumbler" role="group" aria-label="Содержимое пунктов">
                                 <label class="tumbler__item">
                                   <input class="tumbler__input" type="radio" name="socialContent" value="icon" checked>
@@ -324,7 +333,8 @@
                               <button type="button" class="social-settings__arrow" id="socialWidgetSizeToggle" aria-label="Размер виджета" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialSize"></button>
                               <span class="pe__label">Высота</span><span class="pe__dim" id="socialHeightSummary"><span class="pe__dim-value"></span><span class="pe__dim-unit"></span></span>
                             </div>
-                            <div class="pe__card social-settings__appearance" aria-label="Оформление пунктов">
+                            <div class="pe__card social-settings__appearance" id="socialItemSettings" aria-label="Оформление пунктов">
+                              <strong class="social-settings__item-heading" hidden>КНОПКА</strong>
                               <span class="pe__label">Стиль</span>
                               <div class="social-settings__style">
                                 <button type="button" class="btn btn--link btn--size-m btn--icon" id="socialItemStyle" aria-label="Стиль пунктов: Ссылка" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialStyle">
@@ -356,6 +366,10 @@
                           </div>
                         </div>
                         <div class="pe__body social-appearance" id="socialAppearance" hidden>
+                          <div class="pe__card social-settings__layout social-appearance__spacing" id="socialAppearanceSpacing" hidden>
+                            <label class="pe__label" for="socialAppearanceGap">Между</label>
+                            <label class="pe__num"><img src="assets/social-settings/item-gap.svg" alt="" width="12" height="12"><input class="pe__num-value" id="socialAppearanceGap" type="number" min="0" step="any"></label>
+                          </div>
                           <div class="pe__card social-appearance__card">
                             <div class="social-appearance__row">
                               <span class="pe__label">Скругления</span>
@@ -563,6 +577,10 @@
                           <button type="button" class="social-style__option" data-content-mode="caption" aria-pressed="false"><span class="social-style__mode-label">Название и иконку</span></button>
                           <button type="button" class="social-style__option" data-content-mode="name" aria-pressed="false"><span class="social-style__mode-label">Только название</span></button>
                         </div>
+                        <div class="social-style__mode-menu social-style__icon-positions" id="socialStyleIconPositions" role="group" aria-label="Положение иконки" hidden>
+                          <button type="button" class="social-style__option" data-icon-position="left" aria-pressed="false"><img src="assets/social-settings/icon-position-left-menu.svg" alt="" width="32" height="24"><span>Слева</span></button>
+                          <button type="button" class="social-style__option" data-icon-position="right" aria-pressed="false"><img src="assets/social-settings/icon-position-right-menu.svg" alt="" width="32" height="24"><span>Справа</span></button>
+                        </div>
                         <div id="socialButtonPresets" hidden>
                         <div class="social-style__group" role="group" aria-labelledby="socialButtonStyles">
                           <div class="social-style__heading" id="socialButtonStyles">Кнопка</div>
@@ -615,19 +633,24 @@
     </div>
   </div>
 </div>
+<div class="tb tb--style-success social-item-toolbar" id="socialItemToolbar" role="toolbar" aria-label="Настройка пункта соцсети" hidden>
+  <button type="button" class="tb__btn" data-item-command="back" aria-label="Вернуться к виджету"><span class="tb__icon" aria-hidden="true">&#xE9A9;</span></button>
+  <button type="button" class="tb__btn" data-item-command="style" aria-label="Стиль кнопок"><span class="tb__icon social-item-toolbar__roller" aria-hidden="true">&#xEBBB;</span></button>
+  <button type="button" class="tb__btn" data-item-command="color" aria-label="Цвет кнопок"><span class="tb__icon" aria-hidden="true"><i class="tb__sw"></i></span></button>
+  <button type="button" class="tb__btn" id="socialItemFontTool" aria-label="Шрифт" disabled hidden><span class="tb__icon" aria-hidden="true">&#xE764;</span></button>
+  <button type="button" class="tb__btn" data-item-command="size" aria-label="Размер кнопок"><span class="tb__icon" aria-hidden="true">&#xE63E;</span></button>
+  <button type="button" class="tb__btn" id="socialItemGeneralToggle" data-item-command="settings" aria-label="Настройки пункта" aria-haspopup="dialog" aria-expanded="false" aria-controls="socialList"><span class="tb__icon" aria-hidden="true">&#xE75D;</span></button>
+  <button type="button" class="tb__btn tb__btn--delete" data-item-command="delete" aria-label="Удалить пункт"><span class="tb__icon" aria-hidden="true">&#xEB72;</span></button>
+  <button type="button" class="tb__btn" data-item-command="more" aria-label="Ещё" aria-expanded="false" aria-controls="socialItemMore"><span class="tb__icon" aria-hidden="true">&#xEAB4;</span></button>
+  <div class="pe__card social-item-toolbar__more" id="socialItemMore" hidden><a target="_blank" rel="noopener noreferrer">Открыть ссылку</a></div>
+</div>
 <template id="socialScenarioTemplate">
   <div class="df-card df-card--scen social-scenarios" id="socialScenarioGroups">
-    <section aria-labelledby="socialItemScenariosTitle">
-      <h2 class="df-group" id="socialItemScenariosTitle">Настройка пунктов</h2>
-      <div class="df-options" role="radiogroup" aria-labelledby="socialItemScenariosTitle">
-        <label class="social-scenarios__option"><input type="radio" name="socialItemScenario" value="always-visible" checked><span>Список сетей всегда виден</span></label>
-      </div>
-    </section>
     <section aria-labelledby="socialAppearanceScenariosTitle">
       <h2 class="df-group" id="socialAppearanceScenariosTitle">Настройка оформления</h2>
       <div class="df-options" role="radiogroup" aria-labelledby="socialAppearanceScenariosTitle">
-        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="advanced-v2" checked><span>Расширенная настройка V2</span></label>
-        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="grouped"><span>Простая настройка</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="in-place" checked><span>Настройка по месту</span></label>
+        <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="appearance-window"><span>Общее окно оформления</span></label>
       </div>
     </section>
   </div>
@@ -637,15 +660,15 @@
       <label class="social-scenarios__option"><input type="radio" name="socialItemScenario" value="hide-with-context"><span>По контексту: список скрыт</span></label>
       <label class="social-scenarios__option"><input type="radio" name="socialItemScenario" value="always-add"><span>Всегда можно добавлять сеть</span></label>
       <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="advanced"><span>Расширенная настройка V1</span></label>
-      <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="grouped-v2"><span>Простая настройка V2</span></label>
+      <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="advanced-v2"><span>Расширенная настройка V2</span></label>
+      <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="grouped"><span>Простая настройка</span></label>
       <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="mixed"><span>Брендированные и монохром вместе</span></label>
-      <label class="social-scenarios__option"><input type="radio" name="socialAppearanceScenario" value="brand-switch"><span>Переключатель на брендированные цвета</span></label>
     </div>
   </details>
 </template>
 <script src="vendor/ui-kit/components/demo-frame/demo-frame.js"></script>
 <script src="vendor/ui-kit/components/builder-header/builder-header.js?v=3"></script>
 <script src="vendor/ui-kit/components/left-sidebar/left-sidebar.js"></script>
-<script src="app.js?v=76"></script>
+<script src="app.js?v=84"></script>
 </body>
 </html>
