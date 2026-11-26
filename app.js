@@ -61,6 +61,7 @@
   const socialAppearanceToggle = $('socialAppearanceToggle');
   const socialAppearanceSpacing = $('socialAppearanceSpacing');
   const socialAppearanceGap = $('socialAppearanceGap');
+  const socialAppearanceGapRow = [...socialAppearanceSpacing.children];
   const socialColor = $('socialColor');
   const socialColorToggle = $('socialColorToggle');
   const socialItemColorLabel = $('socialItemColorLabel');
@@ -72,6 +73,7 @@
   const socialDirectionControl = directionControls[1];
   const socialContentToggle = $('socialContentToggle');
   const socialContentControls = $('socialContentControls');
+  const socialContentRow = [$('socialContentLabel'), socialContentControls];
   const socialIconPositionToggle = $('socialIconPositionToggle');
   const socialContentCaption = $('socialContentCaption');
   const socialContentTumbler = $('socialContentTumbler');
@@ -1620,7 +1622,8 @@
       } else {
         socialAppearance.prepend(socialAppearanceSpacing);
         socialAppearanceSpacing.prepend(socialLayoutLabel, socialLayoutStyle);
-        socialSettingsLayout.prepend(...directionControls);
+        socialAppearanceSpacing.append(...socialContentRow);
+        socialSettingsLayout.prepend(...directionControls, ...socialAppearanceGapRow);
       }
       socialLayoutLabel.textContent = 'Стиль';
       socialAppearanceSpacing.hidden = false;
@@ -1643,8 +1646,9 @@
     closeSocialColor();
     $('socialListTitle').textContent = generalSettingsTitle();
     socialWidgetDimensions.before(socialSettingsLayout);
-    $('socialItemLinkRow').after(socialLayoutLabel, socialLayoutStyle, socialAppearanceToggle, ...directionControls);
+    $('socialItemLinkRow').after(socialLayoutLabel, socialLayoutStyle, socialAppearanceToggle, ...directionControls, ...socialContentRow);
     socialAppearance.prepend(socialAppearanceSpacing);
+    socialAppearanceSpacing.append(...socialAppearanceGapRow);
     socialLayoutLabel.textContent = hasInlineDirection() ? 'Направление' : 'Оформление';
     socialAppearanceToggle.hidden = false;
     updateDirectionVisibility();
