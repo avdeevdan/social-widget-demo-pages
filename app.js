@@ -1574,10 +1574,14 @@
     socialAppearance.hidden = false;
     if (editingWidgetAppearance()) {
       initialWidgetAppearance = { shape: widgetShape, gap: socialItems.style.gap };
-      socialAppearance.prepend(socialAppearanceSpacing);
-      socialAppearanceSpacing.prepend(socialLayoutLabel, socialLayoutStyle);
-      socialSettingsLayout.prepend(...directionControls);
-      socialLayoutLabel.textContent = 'Стиль';
+      if (appearanceScenario === 'appearance-window') {
+        $('socialContentLabel').before(...directionControls, socialAppearanceSpacing);
+      } else {
+        socialAppearance.prepend(socialAppearanceSpacing);
+        socialAppearanceSpacing.prepend(socialLayoutLabel, socialLayoutStyle);
+        socialSettingsLayout.prepend(...directionControls);
+        socialLayoutLabel.textContent = 'Стиль';
+      }
       socialAppearanceSpacing.hidden = false;
       socialAppearanceGap.value = parseFloat(getComputedStyle(socialItems).gap) || 0;
       socialAppearance.append(socialShapeForm);

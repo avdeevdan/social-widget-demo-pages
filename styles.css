@@ -406,6 +406,8 @@ body.is-resizing{cursor:ew-resize;user-select:none}
 }
 .social-list[data-appearance-scenario="appearance-window"] #socialGeneralFields #socialLayoutLabel { font-size: 15px; }
 .social-list[data-appearance-scenario="appearance-window"] #socialGeneralFields #socialSettingsLayout > .social-settings__style { display: none; }
+.social-list[data-appearance-scenario="appearance-window"] #socialAppearance :is(#socialLayoutLabel, #socialSettingsLayout > .social-settings__style) { display: none; }
+.social-list[data-appearance-scenario="appearance-window"] #socialAppearanceSpacing:not([hidden]) { display: contents; }
 .social-list[data-appearance-scenario="appearance-window"] #socialAppearanceToggle { grid-column: 3; }
 .social-list--widget-appearance #socialAppearance #socialLayoutLabel {
   color: var(--text-label_text-color);
